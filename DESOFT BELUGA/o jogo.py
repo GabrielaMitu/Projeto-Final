@@ -44,7 +44,11 @@ class Player(pygame.sprite.Sprite):
         self.image = player_img
         
         # Diminuindo o tamanho da imagem.
+<<<<<<< HEAD
         self.image = pygame.transform.scale(player_img, (70, 50))
+=======
+        self.image = pygame.transform.scale(player_img, (140, 140))
+>>>>>>> 99792d43dae5a90c184a242bcf0ccbdff3273a84
         
         # Deixando transparente.
         self.image.set_colorkey(BLACK)
@@ -244,7 +248,10 @@ all_sprites.add(player)
 
 
 blocks = pygame.sprite.Group()
+<<<<<<< HEAD
 tiros=pygame.sprite.Group()
+=======
+>>>>>>> 99792d43dae5a90c184a242bcf0ccbdff3273a84
 
 balls = pygame.sprite.Group()
 
