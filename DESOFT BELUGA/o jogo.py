@@ -256,7 +256,6 @@ try:
     #Estados do jogo
     BOLA_NA_BELUGA = 0
     PLAYING = 1
-    GANHOU = 2
     DONE = 3
     PASSOU_NIVEL = 4
     PAUSE = 5
@@ -283,9 +282,11 @@ try:
                     if event.key == pygame.K_RIGHT:
                         player.speedx = 8
                     if event.key == pygame.K_SPACE:
-                       all_sprites.add(ball)
-                       balls.add(ball)
 
+                        all_sprites.add(ball)
+                        balls.add(ball)
+                        
+                       # pew_sound.play()
 
                         
                 # Verifica se soltou alguma tecla.
@@ -320,7 +321,17 @@ try:
                     # Game ends if all the blocks are gone
                     if len(blocks) == 0:
                         state = DONE
- 
+                if ball.y > HEIGHT:
+                    lives -= 1
+                    ball.centerx = int(WIDTH/2)
+                    ball.centery = int(HEIGHT/2)
+                
+                
+                if lives == 0:
+                    state = DONE
+                    
+                    
+             
     
         # Depois de processar os eventos.
         # Atualiza a acao de cada sprite.
@@ -347,7 +358,12 @@ try:
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
         
-       # if state == DONE:
+        if state == DONE and lives > 0:
+            text_surface = score_font.render("{:10d}".format(score), True, BLUE)
+            text_rect = text_surface.get_rect()
+            text_rect.midtop = (WIDTH / 2,  HEIGHT/2)
+            screen.blit(text_surface, text_rect)
+            
             
         
 finally:
