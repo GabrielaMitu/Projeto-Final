@@ -7,6 +7,7 @@ import time
 from os import path
 import math
 
+
 # Estabelece a pasta que contem as figuras e sons.
 img_dir = path.join(path.dirname(__file__), 'img')
 snd_dir = path.join(path.dirname(__file__), 'snd')
@@ -30,7 +31,7 @@ block_width = 23
 block_height = 15
 
 
-# Classe Jogador que representa a nave
+# Classe Jogador que representa a beluga
 class Player(pygame.sprite.Sprite):
     
     # Construtor da classe.
@@ -43,7 +44,7 @@ class Player(pygame.sprite.Sprite):
         self.image = player_img
         
         # Diminuindo o tamanho da imagem.
-        self.image = pygame.transform.scale(player_img, (50, 38))
+        self.image = pygame.transform.scale(player_img, (70, 50))
         
         # Deixando transparente.
         self.image.set_colorkey(BLACK)
@@ -59,9 +60,9 @@ class Player(pygame.sprite.Sprite):
         self.speedx = 0
         
         # Melhora a colisão estabelecendo um raio de um circulo
-        self.radius = 25
+        self.radius = 140
     
-    # Metodo que atualiza a posição da navinha
+    # Metodo que atualiza a posição da beluga
     def update(self):
         self.rect.x += self.speedx
         
@@ -73,17 +74,19 @@ class Player(pygame.sprite.Sprite):
                     
 
 class Block(pygame.sprite.Sprite):
-    def __init__(self, color, x, y):
+    def __init__(self, x, y, submarine_img, tiros):
        
+        self.tiros=tiros
+        
         # Call the parent class (Sprite) constructor
         pygame.sprite.Sprite.__init__(self)
  
         # Create the image of the block of appropriate size
         # The width and height are sent as a list for the first parameter.
-        self.image = pygame.Surface([block_width, block_height])
+        self.image = pygame.transform.scale(submarine_img, (25, 15))
+        
+        self.image.set_colorkey(BLACK)
  
-        # Fill the image with the appropriate color
-        self.image.fill(color)
  
         # Fetch the rectangle object that has the dimensions of the image
         self.rect = self.image.get_rect()
@@ -93,7 +96,34 @@ class Block(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         
+        self.enemy_list = None
+        self.bullet_list = None
         
+    def update(self):
+        """All the logic to move, and the game logic goes here. """
+
+            # Have a random 1 in 200 change of shooting each frame
+        if random.randrange(200) == 0:
+            tiro=Tiro(self.rect.centerx, self.rect.bottom, assets["tiros_img"])
+            self.tiros.add(tiro)
+
+        
+class Tiro(pygame.sprite.Sprite):
+    def __init__(self, x, y, tiro_img):
+        
+        pygame.sprite.Sprite.__init__(self)
+        
+        # Diminuindo o tamanho da imagem.
+        self.image = pygame.transform.scale(tiro_img, (10, 10))
+        self.image.set_colorkey(BLACK)
+        self.rect= self.image.get_rect()
+        self.rect.centerx = x
+        self.rect.y = y
+        self.speed_y=5
+    
+    def update(self):
+        self.rect.y+=self.speed_y
+    
         
 class Ball(pygame.sprite.Sprite):
     # Speed in pixels per cycle
@@ -104,7 +134,7 @@ class Ball(pygame.sprite.Sprite):
     y = 180.0
     
     # Direction of ball (in degrees)
-    direction = 200
+    direction = 95
 
     width=10
     height=10
@@ -173,6 +203,8 @@ def load_assets(img_dir, snd_dir, fnt_dir):
     assets = {}
     assets["background_img"] = pygame.image.load(path.join(img_dir, 'background.png')).convert()
     assets["player_img"] = pygame.image.load(path.join(img_dir, "player.png")).convert()
+    assets["tiros_img"] = pygame.image.load(path.join(img_dir, 'Red_laser.png')).convert()
+    assets["submarine_img"] = pygame.image.load(path.join(img_dir, "submarine.png")).convert()
     assets["score_font"] = pygame.font.Font(path.join(fnt_dir, "PressStart2P.ttf"), 28)
     return assets
 
@@ -212,13 +244,11 @@ all_sprites.add(player)
 
 
 blocks = pygame.sprite.Group()
-balls = pygame.sprite.Group()
- 
+tiros=pygame.sprite.Group()
 
-# Create the ball
-ball = Ball()
-all_sprites.add(ball)
-balls.add(ball)
+balls = pygame.sprite.Group()
+
+
  
 # The top of the block (y position)
 top = 80
@@ -237,7 +267,7 @@ for row in range(5):
     # 32 columns of blocks
     for column in range(0, blockcount):
         # Create a block (color,x,y)
-        block = Block(WHITE, column * (block_width + 2) + 1, top)
+        block=Block(column*(block_width+2)+1,top, (assets["submarine_img"]),tiros)
         blocks.add(block)
         all_sprites.add(block)
     # Move the top of the next row down
@@ -255,8 +285,12 @@ try:
 
     lives = 3
 
-    PLAYING = 0
-    DONE = 2
+    #Estados do jogo
+    BOLA_NA_BELUGA = 0
+    PLAYING = 1
+    DONE = 3
+    PASSOU_NIVEL = 4
+    PAUSE = 5
 
     state = PLAYING
     while state != DONE:
@@ -265,6 +299,11 @@ try:
         clock.tick(FPS)
         
         if state == PLAYING:
+            hits = pygame.sprite.groupcollide(blocks, balls, True, True)
+            for hit in hits: # Pode haver mais de um
+                block = Block(assets["submarine_img"]) 
+                all_sprites.add(block)
+                blocks.add(block)
             # Processa os eventos (mouse, teclado, botão, etc).
             for event in pygame.event.get():
                 
@@ -279,6 +318,14 @@ try:
                         player.speedx = -8
                     if event.key == pygame.K_RIGHT:
                         player.speedx = 8
+                    if event.key == pygame.K_SPACE:
+                        ball = Ball()
+
+                        all_sprites.add(ball)
+                        balls.add(ball)
+                        
+                       # pew_sound.play()
+
                         
                 # Verifica se soltou alguma tecla.
                 if event.type == pygame.KEYUP:
@@ -289,45 +336,53 @@ try:
                         player.speedx = 0
                         
              
-                # See if the ball hits the player paddle
-                if pygame.sprite.spritecollide(player, balls, False):
-                    # The 'diff' lets you try to bounce the ball left or right
-                    # depending where on the paddle you hit it
-                    diff = (player.rect.x + player.width/2) - (ball.rect.x+ball.width/2)
-             
-                    # Set the ball's y position in case
-                    # we hit the ball on the edge of the paddle
-                    ball.rect.y = screen.get_height() - player.rect.height - ball.rect.height - 1
-                    ball.bounce(diff)
-             
-                # Check for collisions between the ball and the blocks
+            # See if the ball hits the player paddle
+            for ball in pygame.sprite.spritecollide(player, balls, False):
+                # The 'diff' lets you try to bounce the ball left or right
+                # depending where on the paddle you hit it
+                diff = (player.rect.x) - (ball.rect.x+ball.width/2)
+         
+                # Set the ball's y position in case
+                # we hit the ball on the edge of the paddle
+                ball.rect.y = screen.get_height() - player.rect.height - ball.rect.height - 1
+                ball.bounce(diff)
+         
+            # Check for collisions between the ball and the blocks
+            for ball in balls:
                 deadblocks = pygame.sprite.spritecollide(ball, blocks, True)
-             
-                # If we actually hit a block, bounce the ball
+         
+            # If we actually hit a block, bounce the ball
                 if len(deadblocks) > 0:
                     ball.bounce(0)
+                    score += 100
+
+         
+                # Game ends if all the blocks are gone
+                if len(blocks) == 0:
+                    state = DONE
+            for ball in balls:
+                if ball.y > HEIGHT:
+                    lives -= 1
+                    ball.kill()
+                
+            
+            if lives == 0:
+                state = DONE
+                    
+                    
              
-                    # Game ends if all the blocks are gone
-                    if len(blocks) == 0:
-                        state = DONE
- 
     
         # Depois de processar os eventos.
         # Atualiza a acao de cada sprite.
         all_sprites.update()
+        tiros.update()
         
-        
-        
-        if state == PLAYING:
-           
-            
-                # Ganhou pontos!
-                score += 100
-            
+                    
         # A cada loop, redesenha o fundo e os sprites
         screen.fill(BLACK)
         screen.blit(background, background_rect)
         all_sprites.draw(screen)
+        tiros.draw(screen)
 
         # Desenha o score
         text_surface = score_font.render("{:08d}".format(score), True, YELLOW)
@@ -343,6 +398,14 @@ try:
         
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
+        
+        if state == DONE and lives > 0:
+            text_surface = score_font.render("{:10d}".format(score), True, BLUE)
+            text_rect = text_surface.get_rect()
+            text_rect.midtop = (WIDTH / 2,  HEIGHT/2)
+            screen.blit(text_surface, text_rect)
+            
+            
         
 finally:
     
