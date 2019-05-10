@@ -3,7 +3,6 @@
 # Importando as bibliotecas necessárias.
 import pygame
 import random
-import time
 from os import path
 import math
 
@@ -44,11 +43,8 @@ class Player(pygame.sprite.Sprite):
         self.image = player_img
         
         # Diminuindo o tamanho da imagem.
-<<<<<<< HEAD
+
         self.image = pygame.transform.scale(player_img, (70, 50))
-=======
-        self.image = pygame.transform.scale(player_img, (140, 140))
->>>>>>> 99792d43dae5a90c184a242bcf0ccbdff3273a84
         
         # Deixando transparente.
         self.image.set_colorkey(BLACK)
@@ -87,7 +83,7 @@ class Block(pygame.sprite.Sprite):
  
         # Create the image of the block of appropriate size
         # The width and height are sent as a list for the first parameter.
-        self.image = pygame.transform.scale(submarine_img, (25, 15))
+        self.image = pygame.transform.scale(submarine_img, (45, 30))
         
         self.image.set_colorkey(BLACK)
  
@@ -100,11 +96,7 @@ class Block(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         
-        self.enemy_list = None
-        self.bullet_list = None
-        
     def update(self):
-        """All the logic to move, and the game logic goes here. """
 
             # Have a random 1 in 200 change of shooting each frame
         if random.randrange(200) == 0:
@@ -118,6 +110,7 @@ class Tiro(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         
         # Diminuindo o tamanho da imagem.
+        #random.randrange(200) == 0:
         self.image = pygame.transform.scale(tiro_img, (10, 10))
         self.image.set_colorkey(BLACK)
         self.rect= self.image.get_rect()
@@ -248,10 +241,8 @@ all_sprites.add(player)
 
 
 blocks = pygame.sprite.Group()
-<<<<<<< HEAD
+
 tiros=pygame.sprite.Group()
-=======
->>>>>>> 99792d43dae5a90c184a242bcf0ccbdff3273a84
 
 balls = pygame.sprite.Group()
 
@@ -274,7 +265,7 @@ for row in range(5):
     # 32 columns of blocks
     for column in range(0, blockcount):
         # Create a block (color,x,y)
-        block=Block(column*(block_width+2)+1,top, (assets["submarine_img"]),tiros)
+        block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
         blocks.add(block)
         all_sprites.add(block)
     # Move the top of the next row down
@@ -306,11 +297,10 @@ try:
         clock.tick(FPS)
         
         if state == PLAYING:
-            hits = pygame.sprite.groupcollide(blocks, balls, True, True)
+            hits = pygame.sprite.groupcollide(blocks, balls, True, False)
             for hit in hits: # Pode haver mais de um
-                block = Block(assets["submarine_img"]) 
-                all_sprites.add(block)
-                blocks.add(block)
+                score+=100
+                
             # Processa os eventos (mouse, teclado, botão, etc).
             for event in pygame.event.get():
                 
