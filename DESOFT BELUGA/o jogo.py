@@ -43,13 +43,9 @@ class Player(pygame.sprite.Sprite):
         self.image = player_img
         
         # Diminuindo o tamanho da imagem.
-<<<<<<< HEAD
 
         self.image = pygame.transform.scale(player_img, (70, 50))
-=======
-        self.image = pygame.transform.scale(player_img, (70, 50))
 
->>>>>>> 64ce2ea5b06e16304022f882dbfb72b349742a12
         
         # Deixando transparente.
         self.image.set_colorkey(BLACK)
@@ -352,11 +348,6 @@ try:
             # Check for collisions between the ball and the blocks
             for ball in balls:
                 deadblocks = pygame.sprite.spritecollide(ball, blocks, True)
-         
-            # If we actually hit a block, bounce the ball
-                if len(deadblocks) > 0:
-                    ball.bounce(0)
-                    score += 100
 
          
                 # Game ends if all the blocks are gone
@@ -366,6 +357,7 @@ try:
                 if ball.y > HEIGHT:
                     lives -= 1
                     ball.kill()
+    
                 
             
             if lives == 0:
