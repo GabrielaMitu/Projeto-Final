@@ -214,7 +214,6 @@ all_sprites.add(player)
 blocks = pygame.sprite.Group()
 
 balls = pygame.sprite.Group()
-ball = Ball()
 
 
  
@@ -282,6 +281,7 @@ try:
                     if event.key == pygame.K_RIGHT:
                         player.speedx = 8
                     if event.key == pygame.K_SPACE:
+                        ball = Ball()
 
                         all_sprites.add(ball)
                         balls.add(ball)
@@ -298,37 +298,38 @@ try:
                         player.speedx = 0
                         
              
-                # See if the ball hits the player paddle
-                if pygame.sprite.spritecollide(player, balls, False):
-                    # The 'diff' lets you try to bounce the ball left or right
-                    # depending where on the paddle you hit it
-                    diff = (player.rect.x) - (ball.rect.x+ball.width/2)
-             
-                    # Set the ball's y position in case
-                    # we hit the ball on the edge of the paddle
-                    ball.rect.y = screen.get_height() - player.rect.height - ball.rect.height - 1
-                    ball.bounce(diff)
-             
-                # Check for collisions between the ball and the blocks
+            # See if the ball hits the player paddle
+            for ball in pygame.sprite.spritecollide(player, balls, False):
+                # The 'diff' lets you try to bounce the ball left or right
+                # depending where on the paddle you hit it
+                diff = (player.rect.x) - (ball.rect.x+ball.width/2)
+         
+                # Set the ball's y position in case
+                # we hit the ball on the edge of the paddle
+                ball.rect.y = screen.get_height() - player.rect.height - ball.rect.height - 1
+                ball.bounce(diff)
+         
+            # Check for collisions between the ball and the blocks
+            for ball in balls:
                 deadblocks = pygame.sprite.spritecollide(ball, blocks, True)
-             
-                # If we actually hit a block, bounce the ball
+         
+            # If we actually hit a block, bounce the ball
                 if len(deadblocks) > 0:
                     ball.bounce(0)
                     score += 100
 
-             
-                    # Game ends if all the blocks are gone
-                    if len(blocks) == 0:
-                        state = DONE
+         
+                # Game ends if all the blocks are gone
+                if len(blocks) == 0:
+                    state = DONE
+            for ball in balls:
                 if ball.y > HEIGHT:
                     lives -= 1
-                    ball.centerx = int(WIDTH/2)
-                    ball.centery = int(HEIGHT/2)
+                    ball.kill()
                 
-                
-                if lives == 0:
-                    state = DONE
+            
+            if lives == 0:
+                state = DONE
                     
                     
              
