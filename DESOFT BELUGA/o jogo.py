@@ -30,7 +30,7 @@ block_width = 23
 block_height = 15
 
 
-# Classe Jogador que representa a nave
+# Classe Jogador que representa a beluga
 class Player(pygame.sprite.Sprite):
     
     # Construtor da classe.
@@ -43,7 +43,7 @@ class Player(pygame.sprite.Sprite):
         self.image = player_img
         
         # Diminuindo o tamanho da imagem.
-        self.image = pygame.transform.scale(player_img, (50, 38))
+        self.image = pygame.transform.scale(player_img, (140, 140))
         
         # Deixando transparente.
         self.image.set_colorkey(BLACK)
@@ -59,9 +59,9 @@ class Player(pygame.sprite.Sprite):
         self.speedx = 0
         
         # Melhora a colisão estabelecendo um raio de um circulo
-        self.radius = 25
+        self.radius = 140
     
-    # Metodo que atualiza a posição da navinha
+    # Metodo que atualiza a posição da beluga
     def update(self):
         self.rect.x += self.speedx
         
@@ -104,7 +104,7 @@ class Ball(pygame.sprite.Sprite):
     y = 180.0
     
     # Direction of ball (in degrees)
-    direction = 200
+    direction = 95
 
     width=10
     height=10
@@ -212,13 +212,11 @@ all_sprites.add(player)
 
 
 blocks = pygame.sprite.Group()
-balls = pygame.sprite.Group()
- 
 
-# Create the ball
+balls = pygame.sprite.Group()
 ball = Ball()
-all_sprites.add(ball)
-balls.add(ball)
+
+
  
 # The top of the block (y position)
 top = 80
@@ -255,8 +253,13 @@ try:
 
     lives = 3
 
-    PLAYING = 0
-    DONE = 2
+    #Estados do jogo
+    BOLA_NA_BELUGA = 0
+    PLAYING = 1
+    GANHOU = 2
+    DONE = 3
+    PASSOU_NIVEL = 4
+    PAUSE = 5
 
     state = PLAYING
     while state != DONE:
@@ -279,6 +282,11 @@ try:
                         player.speedx = -8
                     if event.key == pygame.K_RIGHT:
                         player.speedx = 8
+                    if event.key == pygame.K_SPACE:
+                       all_sprites.add(ball)
+                       balls.add(ball)
+
+
                         
                 # Verifica se soltou alguma tecla.
                 if event.type == pygame.KEYUP:
@@ -293,7 +301,7 @@ try:
                 if pygame.sprite.spritecollide(player, balls, False):
                     # The 'diff' lets you try to bounce the ball left or right
                     # depending where on the paddle you hit it
-                    diff = (player.rect.x + player.width/2) - (ball.rect.x+ball.width/2)
+                    diff = (player.rect.x) - (ball.rect.x+ball.width/2)
              
                     # Set the ball's y position in case
                     # we hit the ball on the edge of the paddle
@@ -306,6 +314,8 @@ try:
                 # If we actually hit a block, bounce the ball
                 if len(deadblocks) > 0:
                     ball.bounce(0)
+                    score += 100
+
              
                     # Game ends if all the blocks are gone
                     if len(blocks) == 0:
@@ -316,14 +326,7 @@ try:
         # Atualiza a acao de cada sprite.
         all_sprites.update()
         
-        
-        
-        if state == PLAYING:
-           
-            
-                # Ganhou pontos!
-                score += 100
-            
+                    
         # A cada loop, redesenha o fundo e os sprites
         screen.fill(BLACK)
         screen.blit(background, background_rect)
@@ -343,6 +346,9 @@ try:
         
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
+        
+       # if state == DONE:
+            
         
 finally:
     
