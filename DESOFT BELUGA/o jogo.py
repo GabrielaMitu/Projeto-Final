@@ -72,9 +72,7 @@ class Player(pygame.sprite.Sprite):
         
         # Diminuindo o tamanho da imagem.
 
-        self.image = pygame.transform.scale(player_img, (70, 70))
-
-        self.image = pygame.transform.scale(player_img, (70, 70))
+        self.image = pygame.transform.scale(player_img, (70, 50))
         
         # Deixando transparente.
         self.image.set_colorkey(BLACK)
@@ -160,11 +158,11 @@ class Ball(pygame.sprite.Sprite):
     speed = 10.0
     
     # Floating point representation of where the ball is
-    x = 0.0
-    y = 180.0
+    x = 400.0
+    y = 490.0
     
     # Direction of ball (in degrees)
-    direction = 95
+    direction = 45
 
     width=10
     height=10
