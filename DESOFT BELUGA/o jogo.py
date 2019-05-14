@@ -7,6 +7,7 @@ from os import path
 import math
 from pygame.locals import *
 import time
+import pygameMenu
 
 
 # Estabelece a pasta que contem as figuras e sons.
@@ -31,7 +32,32 @@ YELLOW = (255, 255, 0)
 block_width = 23
 block_height = 15
 
+                
+def draw_text_middle(text, size, color, surface):
+    label = score_font.render(text, 1, color)
+     
+    surface.blit(label, (WIDTH/2 - (label.get_width() / 2), HEIGHT/2 - label.get_height()/2))
 
+
+
+def main_menu():
+    
+    tela = pygame.display.set_mode((WIDTH, HEIGHT))
+    run = True
+    state= MENU
+    while run:
+        tela.fill((0,0,0))
+        draw_text_middle('Press any key to begin.', 60, WHITE, tela)
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                state=DONE
+                run = False
+ 
+            if event.type == pygame.KEYDOWN:
+                state = PLAYING 
+
+                            
 # Classe Jogador que representa a beluga
 class Player(pygame.sprite.Sprite):
     
@@ -275,6 +301,9 @@ def load_assets(img_dir, snd_dir, fnt_dir):
     assets["score_font"] = pygame.font.Font(path.join(fnt_dir, "PressStart2P.ttf"), 28)
     return assets
 
+
+
+
 # Inicialização do Pygame.
 pygame.init()
 pygame.mixer.init()
@@ -341,6 +370,8 @@ for row in range(5):
 
 
 
+
+
 # Comando para evitar travamentos.
 try:
     # Loop principal.
@@ -355,7 +386,28 @@ try:
     DONE = 3
     PASSOU_NIVEL = 4
     PAUSED = 5
-
+    MENU=6
+    
+#    state= MENU
+#    surface= 200,300#pygame.Surface(800,600)
+#    #pygame.surface.fill(BLUE)
+#    window_width=WIDTH
+#    window_height=HEIGHT
+#    title="MENU PRINCIPAL"
+#    text_surface = score_font.render("Aperte uma tecla para começar", True, YELLOW)
+#    text_rect = text_surface.get_rect()
+#    text_rect.midtop = (WIDTH / 2,  10)
+#    screen.blit(text_surface, text_rect)
+#    pygameMenu.Menu(surface, window_width, window_height, score_font, title) # -> Menu object
+#    for event in pygame.event.get():
+#                    # Verifica se foi fechado.
+#                    if event.type == pygame.QUIT:
+#                        state = DONE
+#                    # Verifica se apertou alguma tecla.
+#                    if event.type == pygame.KEYDOWN:
+#                        state=PLAYING    
+    
+    main_menu()
     state = PLAYING
     while state != DONE:
         

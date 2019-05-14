@@ -5,29 +5,9 @@ Created on Sat May 11 22:46:44 2019
 @author: gabic
 """
 
-class Level():
-    def __init__(self, player):
-        self.background = None
-        self.player = player
-        self.position = None
 
-    def update(self):
-
-        self.walls.update()
-
-
-    def draw(self, screen):
-
-        screen.blit(self.background, [0,0])
-
-        self.walls.draw(screen)
-
-
-
-class Level_01(Level):
-    def __init__(self, player):
-        Level.__init__(self, player)
-        self.background = image_bg[0].convert()
+def level01():
+        background = 
         self.position = (40, 500)
         tile = image_tile[0].convert()
 
