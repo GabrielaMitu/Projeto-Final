@@ -5,9 +5,6 @@ import pygame
 import random
 from os import path
 import math
-from pygame.locals import *
-import time
-import pygameMenu
 
 
 # Estabelece a pasta que contem as figuras e sons.
@@ -32,32 +29,7 @@ YELLOW = (255, 255, 0)
 block_width = 23
 block_height = 15
 
-                
-def draw_text_middle(text, size, color, surface):
-    label = score_font.render(text, 1, color)
-     
-    surface.blit(label, (WIDTH/2 - (label.get_width() / 2), HEIGHT/2 - label.get_height()/2))
 
-
-
-def main_menu():
-    
-    tela = pygame.display.set_mode((WIDTH, HEIGHT))
-    run = True
-    state= MENU
-    while run:
-        tela.fill((0,0,0))
-        draw_text_middle('Press any key to begin.', 60, WHITE, tela)
-        pygame.display.update()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                state=DONE
-                run = False
- 
-            if event.type == pygame.KEYDOWN:
-                state = PLAYING 
-
-                            
 # Classe Jogador que representa a beluga
 class Player(pygame.sprite.Sprite):
     
@@ -73,6 +45,7 @@ class Player(pygame.sprite.Sprite):
         # Diminuindo o tamanho da imagem.
 
         self.image = pygame.transform.scale(player_img, (70, 50))
+
         
         # Deixando transparente.
         self.image.set_colorkey(BLACK)
@@ -88,7 +61,7 @@ class Player(pygame.sprite.Sprite):
         self.speedx = 0
         
         # Melhora a colisão estabelecendo um raio de um circulo
-        self.radius = 70
+        self.radius = 140
     
     # Metodo que atualiza a posição da beluga
     def update(self):
@@ -127,11 +100,9 @@ class Block(pygame.sprite.Sprite):
     def update(self):
 
             # Have a random 1 in 200 change of shooting each frame
-        if random.randrange(20000) == 0:
+        if random.randrange(10000) == 0:
             tiro=Tiro(self.rect.centerx, self.rect.bottom, assets["tiros_img"])
             self.tiros.add(tiro)
-            
-
 
         
 class Tiro(pygame.sprite.Sprite):
@@ -146,8 +117,7 @@ class Tiro(pygame.sprite.Sprite):
         self.rect= self.image.get_rect()
         self.rect.centerx = x
         self.rect.y = y
-        velocidade=random.randint(1,7)
-        self.speed_y=velocidade
+        self.speed_y=5
     
     def update(self):
         self.rect.y+=self.speed_y
@@ -217,64 +187,13 @@ class Ball(pygame.sprite.Sprite):
         if self.x > self.screenwidth-self.width:
             self.direction = (360-self.direction)%360
             self.x=self.screenwidth-self.width-1
+    
         
         # Did we fall off the bottom edge of the screen?
         if self.y > 600:
             return True
         else:
             return False
-        
-        
-        
-        
-class Explosion(pygame.sprite.Sprite):
-
-    # Construtor da classe.
-    def __init__(self, center, explosion_anim):
-        # Construtor da classe pai (Sprite).
-        pygame.sprite.Sprite.__init__(self)
-
-        # Carrega a animação de explosão
-        self.explosion_anim = explosion_anim
-
-        # Inicia o processo de animação colocando a primeira imagem na tela.
-        self.frame = 0
-        self.image = self.explosion_anim[self.frame]
-        self.rect = self.image.get_rect()
-        self.rect.center = center
-
-        # Guarda o tick da primeira imagem
-        self.last_update = pygame.time.get_ticks()
-
-        # Controle de ticks de animação: troca de imagem a cada self.frame_ticks milissegundos.
-        self.frame_ticks = 50
-
-    def update(self):
-        # Verifica o tick atual.
-        now = pygame.time.get_ticks()
-
-        # Verifica quantos ticks se passaram desde a ultima mudança de frame.
-        elapsed_ticks = now - self.last_update
-
-        # Se já está na hora de mudar de imagem...
-        if elapsed_ticks > self.frame_ticks:
-
-            # Marca o tick da nova imagem.
-            self.last_update = now
-
-            # Avança um quadro.
-            self.frame += 1
-
-            # Verifica se já chegou no final da animação.
-            if self.frame == len(self.explosion_anim):
-                # Se sim, tchau explosão!
-                self.kill()
-            else:
-                # Se ainda não chegou ao fim da explosão, troca de imagem.
-                center = self.rect.center
-                self.image = self.explosion_anim[self.frame]
-                self.rect = self.image.get_rect()
-                self.rect.center = center
  
  
 
@@ -286,21 +205,7 @@ def load_assets(img_dir, snd_dir, fnt_dir):
     assets["tiros_img"] = pygame.image.load(path.join(img_dir, 'Red_laser.png')).convert()
     assets["submarine_img"] = pygame.image.load(path.join(img_dir, "submarine.png")).convert()
     assets["score_font"] = pygame.font.Font(path.join(fnt_dir, "PressStart2P.ttf"), 28)
-    assets["boom_sound"] = pygame.mixer.Sound(path.join(snd_dir, 'expl3.wav'))
-
-    explosion_anim = []
-    for i in range(9):
-        filename = 'regularExplosion0{}.png'.format(i)
-        img = pygame.image.load(path.join(img_dir, filename)).convert()
-        img = pygame.transform.scale(img, (32, 32))        
-        img.set_colorkey(BLACK)
-        explosion_anim.append(img)
-    assets["explosion_anim"] = explosion_anim
-    assets["score_font"] = pygame.font.Font(path.join(fnt_dir, "PressStart2P.ttf"), 28)
     return assets
-
-
-
 
 # Inicialização do Pygame.
 pygame.init()
@@ -325,8 +230,6 @@ background_rect = background.get_rect()
 # Carrega os sons do jogo
 pygame.mixer.music.load(path.join(snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
 pygame.mixer.music.set_volume(0.4)
-boom_sound = assets["boom_sound"]
-
 
 # Cria uma nave. O construtor será chamado automaticamente.
 player = Player(assets["player_img"])
@@ -337,8 +240,12 @@ score_font = assets["score_font"]
 # Cria um grupo de todos os sprites e adiciona a nave.
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
+
+
 blocks = pygame.sprite.Group()
+
 tiros=pygame.sprite.Group()
+
 balls = pygame.sprite.Group()
 
 
@@ -368,44 +275,23 @@ for row in range(5):
 
 
 
-
-
 # Comando para evitar travamentos.
 try:
+    
     # Loop principal.
     pygame.mixer.music.play(loops=-1)
+
     score = 0
+
     lives = 3
 
     #Estados do jogo
     BOLA_NA_BELUGA = 0
     PLAYING = 1
-    EXPLODING = 2
     DONE = 3
     PASSOU_NIVEL = 4
-    PAUSED = 5
-    MENU=6
-    
-#    state= MENU
-#    surface= 200,300#pygame.Surface(800,600)
-#    #pygame.surface.fill(BLUE)
-#    window_width=WIDTH
-#    window_height=HEIGHT
-#    title="MENU PRINCIPAL"
-#    text_surface = score_font.render("Aperte uma tecla para começar", True, YELLOW)
-#    text_rect = text_surface.get_rect()
-#    text_rect.midtop = (WIDTH / 2,  10)
-#    screen.blit(text_surface, text_rect)
-#    pygameMenu.Menu(surface, window_width, window_height, score_font, title) # -> Menu object
-#    for event in pygame.event.get():
-#                    # Verifica se foi fechado.
-#                    if event.type == pygame.QUIT:
-#                        state = DONE
-#                    # Verifica se apertou alguma tecla.
-#                    if event.type == pygame.KEYDOWN:
-#                        state=PLAYING    
-    
-    main_menu()
+    PAUSE = 5
+
     state = PLAYING
     while state != DONE:
         
@@ -416,6 +302,9 @@ try:
             hits = pygame.sprite.groupcollide(blocks, balls, True, False)
             for hit in hits: # Pode haver mais de um
                 score+=100
+                for ball in pygame.sprite.spritecollide(block, balls, True):
+                    diff = (block.rect.x) - (ball.rect.x+ball.width/2)
+                
                 
             # Processa os eventos (mouse, teclado, botão, etc).
             for event in pygame.event.get():
@@ -423,7 +312,6 @@ try:
                 # Verifica se foi fechado.
                 if event.type == pygame.QUIT:
                     state = DONE
-                    
                 
                 # Verifica se apertou alguma tecla.
                 if event.type == pygame.KEYDOWN:
@@ -439,9 +327,6 @@ try:
                         balls.add(ball)
                         
                        # pew_sound.play()
-                    if event.key ==pygame.K_ESCAPE:
-                        state = PAUSED
-            
 
                         
                 # Verifica se soltou alguma tecla.
@@ -452,7 +337,7 @@ try:
                     if event.key == pygame.K_RIGHT:
                         player.speedx = 0
                         
-                
+             
             # See if the ball hits the player paddle
             for ball in pygame.sprite.spritecollide(player, balls, False):
                 # The 'diff' lets you try to bounce the ball left or right
@@ -467,58 +352,30 @@ try:
             # Check for collisions between the ball and the blocks
             for ball in balls:
                 deadblocks = pygame.sprite.spritecollide(ball, blocks, True)
-                 # If we actually hit a block, bounce the ball
-                if len(deadblocks) > 0:
-                    ball.bounce(0)
-                                                    
+                
+
+         
                 # Game ends if all the blocks are gone
                 if len(blocks) == 0:
                     state = DONE
-                    
-                    
-           
- 
-                    
             for ball in balls:
                 if ball.y > HEIGHT:
                     lives -= 1
                     ball.kill()
                     
+            for t in tiros:
+                hit_no_player = pygame.sprite.spritecollide(player, tiros, True)
+                for h in hit_no_player:
+                    lives-=1
                     
-            
-    
+            #for ball in pygame.sprite.spritecollide(block, balls, True):
+             #   diff = (block.rect.x) - (ball.rect.x+ball.width/2)
                 
             
-            if lives == 0:
+            if lives <= 0:
                 state = DONE
                     
-               # Verifica se houve colisão entre nave e meteoro
-            hits = pygame.sprite.spritecollide(player, tiros, False, pygame.sprite.collide_circle)
-            if hits:
-                # Toca o som da colisão
-                boom_sound.play()
-                player.kill()
-                lives -= 1
-                for ball in balls:
-                    ball.kill()
-                explosao = Explosion(player.rect.center, assets["explosion_anim"])
-                all_sprites.add(explosao)
-                state = EXPLODING
-                explosion_tick = pygame.time.get_ticks()
-                explosion_duration = explosao.frame_ticks * len(explosao.explosion_anim) + 400
-            
-            if state == EXPLODING:
-                now = pygame.time.get_ticks()
-                if now - explosion_tick > explosion_duration:
-                    if lives == 0:
-                        state = DONE
-                    else:
-                        state = PLAYING
-                        player = Player(assets["player_img"])
-                        all_sprites.add(player)
-       
-             
-    
+                    
         # Depois de processar os eventos.
         # Atualiza a acao de cada sprite.
         all_sprites.update()
