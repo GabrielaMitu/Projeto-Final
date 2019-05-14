@@ -32,30 +32,68 @@ YELLOW = (255, 255, 0)
 block_width = 23
 block_height = 15
 
-                
-def draw_text_middle(text, size, color, surface):
-    label = score_font.render(text, 1, color)
-     
-    surface.blit(label, (WIDTH/2 - (label.get_width() / 2), HEIGHT/2 - label.get_height()/2))
+
+# Estados para controle do fluxo da aplicação
+INIT = 0
+GAME = 1
+QUIT = 2
 
 
 
-def main_menu():
-    
-    tela = pygame.display.set_mode((WIDTH, HEIGHT))
-    run = True
-    state= MENU
-    while run:
-        tela.fill((0,0,0))
-        draw_text_middle('Press any key to begin.', 60, WHITE, tela)
-        pygame.display.update()
+def init_screen(screen):
+    # Variável para o ajuste de velocidade
+    clock = pygame.time.Clock()
+
+    # Carrega o fundo da tela inicial
+    background = pygame.image.load(path.join(img_dir, 'intro-01.png')).convert()
+    background_rect = background.get_rect()
+
+    running = True
+    while running:      
+        # Ajusta a velocidade do jogo.
+        clock.tick(FPS)       
+        # Processa os eventos (mouse, teclado, botão, etc).
         for event in pygame.event.get():
+            # Verifica se foi fechado.
             if event.type == pygame.QUIT:
-                state=DONE
-                run = False
- 
+                state = QUIT
+                running = False
             if event.type == pygame.KEYDOWN:
-                state = PLAYING 
+                state = GAME
+                running = False
+                    
+        # A cada loop, redesenha o fundo e os sprites
+        screen.fill(BLACK)
+        screen.blit(background, background_rect)
+
+        # Depois de desenhar tudo, inverte o display.
+        pygame.display.flip()
+
+    return state
+                
+#def draw_text_middle(text, size, color, surface):
+#    label = score_font.render(text, 1, color)
+#     
+#    surface.blit(label, (WIDTH/2 - (label.get_width() / 2), HEIGHT/2 - label.get_height()/2))
+#
+#
+#
+#def main_menu():
+#    
+#    tela = pygame.display.set_mode((WIDTH, HEIGHT))
+#    run = True
+#    state= MENU
+#    while run:
+#        tela.fill((0,0,0))
+#        draw_text_middle('Press any key to begin.', 60, WHITE, tela)
+#        pygame.display.update()
+#        for event in pygame.event.get():
+#            if event.type == pygame.QUIT:
+#                state=DONE
+#                run = False
+# 
+#            if event.type == pygame.KEYDOWN:
+#                state = PLAYING 
 
                             
 # Classe Jogador que representa a beluga
@@ -104,6 +142,7 @@ class Player(pygame.sprite.Sprite):
                     
 
 class Block(pygame.sprite.Sprite):
+
     def __init__(self, x, y, submarine_img, tiros):
        
         self.tiros=tiros
@@ -127,6 +166,8 @@ class Block(pygame.sprite.Sprite):
         self.rect.y = y
         
     def update(self):
+        assets = load_assets(img_dir, snd_dir, fnt_dir)
+
 
             # Have a random 1 in 200 change of shooting each frame
         if random.randrange(20000) == 0:
@@ -304,76 +345,69 @@ def load_assets(img_dir, snd_dir, fnt_dir):
 
 
 
-# Inicialização do Pygame.
-pygame.init()
-pygame.mixer.init()
-
-# Tamanho da tela.
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-
-# Nome do jogo
-pygame.display.set_caption("BELUGA")
-
-# Carrega todos os assets uma vez só e guarda em um dicionário
-assets = load_assets(img_dir, snd_dir, fnt_dir)
-
-# Variável para o ajuste de velocidade
-clock = pygame.time.Clock()
-
-# Carrega o fundo do jogo
-background = assets["background_img"]
-background_rect = background.get_rect()
-
-# Carrega os sons do jogo
-pygame.mixer.music.load(path.join(snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
-pygame.mixer.music.set_volume(0.4)
-boom_sound = assets["boom_sound"]
-
-
-# Cria uma nave. O construtor será chamado automaticamente.
-player = Player(assets["player_img"])
-
-# Carrega a fonte para desenhar o score.
-score_font = assets["score_font"]
-
-# Cria um grupo de todos os sprites e adiciona a nave.
-all_sprites = pygame.sprite.Group()
-all_sprites.add(player)
-blocks = pygame.sprite.Group()
-tiros=pygame.sprite.Group()
-balls = pygame.sprite.Group()
-
-
- 
-# The top of the block (y position)
-top = 80
- 
-# Number of blocks to create
-blockcount = 32
- 
-
-font = pygame.font.Font(None, 36)
-
-
-# --- Create blocks
- 
-# Five rows of blocks
-for row in range(5):
-    # 32 columns of blocks
-    for column in range(0, blockcount):
-        # Create a block (color,x,y)
-        block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
-        blocks.add(block)
-        all_sprites.add(block)
-    # Move the top of the next row down
-    top += block_height + 2
-
-
-
-
-
-# Comando para evitar travamentos.
-try:
+def game_screen(screen):
+    
+    # Tamanho da tela.
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    
+    # Nome do jogo
+    pygame.display.set_caption("BELUGA")
+    
+    # Carrega todos os assets uma vez só e guarda em um dicionário
+    assets = load_assets(img_dir, snd_dir, fnt_dir)
+    
+    # Variável para o ajuste de velocidade
+    clock = pygame.time.Clock()
+    
+    # Carrega o fundo do jogo
+    background = assets["background_img"]
+    background_rect = background.get_rect()
+    
+    # Carrega os sons do jogo
+    pygame.mixer.music.load(path.join(snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
+    pygame.mixer.music.set_volume(0.4)
+    boom_sound = assets["boom_sound"]
+    
+    
+    # Cria uma nave. O construtor será chamado automaticamente.
+    player = Player(assets["player_img"])
+    
+    # Carrega a fonte para desenhar o score.
+    score_font = assets["score_font"]
+    
+    # Cria um grupo de todos os sprites e adiciona a nave.
+    all_sprites = pygame.sprite.Group()
+    all_sprites.add(player)
+    blocks = pygame.sprite.Group()
+    tiros=pygame.sprite.Group()
+    balls = pygame.sprite.Group()
+    
+    
+     
+    # The top of the block (y position)
+    top = 80
+     
+    # Number of blocks to create
+    blockcount = 32
+     
+    
+    font = pygame.font.Font(None, 36)
+    
+    
+    # --- Create blocks
+     
+    # Five rows of blocks
+    for row in range(5):
+        # 32 columns of blocks
+        for column in range(0, blockcount):
+            # Create a block (color,x,y)
+            block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
+            blocks.add(block)
+            all_sprites.add(block)
+        # Move the top of the next row down
+        top += block_height + 2
+    
+    
     # Loop principal.
     pygame.mixer.music.play(loops=-1)
     score = 0
@@ -387,27 +421,27 @@ try:
     PASSOU_NIVEL = 4
     PAUSED = 5
     MENU=6
-    
-#    state= MENU
-#    surface= 200,300#pygame.Surface(800,600)
-#    #pygame.surface.fill(BLUE)
-#    window_width=WIDTH
-#    window_height=HEIGHT
-#    title="MENU PRINCIPAL"
-#    text_surface = score_font.render("Aperte uma tecla para começar", True, YELLOW)
-#    text_rect = text_surface.get_rect()
-#    text_rect.midtop = (WIDTH / 2,  10)
-#    screen.blit(text_surface, text_rect)
-#    pygameMenu.Menu(surface, window_width, window_height, score_font, title) # -> Menu object
-#    for event in pygame.event.get():
-#                    # Verifica se foi fechado.
-#                    if event.type == pygame.QUIT:
-#                        state = DONE
-#                    # Verifica se apertou alguma tecla.
-#                    if event.type == pygame.KEYDOWN:
-#                        state=PLAYING    
-    
-    main_menu()
+        
+    #    state= MENU
+    #    surface= 200,300#pygame.Surface(800,600)
+    #    #pygame.surface.fill(BLUE)
+    #    window_width=WIDTH
+    #    window_height=HEIGHT
+    #    title="MENU PRINCIPAL"
+    #    text_surface = score_font.render("Aperte uma tecla para começar", True, YELLOW)
+    #    text_rect = text_surface.get_rect()
+    #    text_rect.midtop = (WIDTH / 2,  10)
+    #    screen.blit(text_surface, text_rect)
+    #    pygameMenu.Menu(surface, window_width, window_height, score_font, title) # -> Menu object
+    #    for event in pygame.event.get():
+    #                    # Verifica se foi fechado.
+    #                    if event.type == pygame.QUIT:
+    #                        state = DONE
+    #                    # Verifica se apertou alguma tecla.
+    #                    if event.type == pygame.KEYDOWN:
+    #                        state=PLAYING    
+        
+    #main_menu()
     state = PLAYING
     while state != DONE:
         
@@ -547,25 +581,36 @@ try:
         
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
-        
-        if state == DONE and lives > 0:
-            text_surface = score_font.render("{:10d}".format(score), True, BLUE)
-            text_rect = text_surface.get_rect()
-            text_rect.midtop = (WIDTH / 2,  HEIGHT/2)
-            screen.blit(text_surface, text_rect)
             
             
-        
+    return QUIT 
+
+
+# Inicialização do Pygame.
+pygame.init()
+pygame.mixer.init()
+
+# Tamanho da tela.
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
+
+# Nome do jogo
+pygame.display.set_caption("FBI")
+
+# Comando para evitar travamentos.
+try:
+    state = INIT
+    while state != QUIT:
+        if state == INIT:
+            state = init_screen(screen)
+        elif state == GAME:
+            state = game_screen(screen)
+        else:
+            state = QUIT
 finally:
-    
     pygame.quit()
 
-
-
-
-
-
-
+  
 
 
 
