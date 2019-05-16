@@ -173,7 +173,7 @@ class Explosion(pygame.sprite.Sprite):
 # Carrega todos os assets uma vez só.
 def load_assets(img_dir, snd_dir, fnt_dir):
     assets = {}
-    assets["background_img"] = pygame.image.load(path.join(img_dir, 'background.png')).convert()
+    assets["background_img"] = pygame.image.load(path.join(img_dir, 'NORWAY.png')).convert()
     assets["player_img"] = pygame.image.load(path.join(img_dir, "player.png")).convert()
     assets["tiros_img"] = pygame.image.load(path.join(img_dir, 'Red_laser.png')).convert()
     assets["submarine_img"] = pygame.image.load(path.join(img_dir, "submarine.png")).convert()
