@@ -414,6 +414,12 @@ try:
         
         if state == PLAYING:
             hits = pygame.sprite.groupcollide(blocks, balls, True, False)
+            for block in hits: # Pode haver mais de um
+                for ball in hits[block]:
+                    score+=100
+                    diff = (block.rect.x) - (ball.rect.x+ball.width/2)
+                    ball.rect.y = screen.get_height() - block.rect.height - ball.rect.height - 1
+                    ball.bounce(diff)
             for hit in hits: # Pode haver mais de um
                 score+=100
                 
