@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+###jogo numa função (game_screen)
 
 # Importando as bibliotecas necessárias.
 import pygame
