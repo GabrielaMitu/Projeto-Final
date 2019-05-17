@@ -42,18 +42,49 @@ QUIT = 2
 
 level = 1
 
+def introducao():
 
-def nivel(velocidade, imagem, numero_blocos, imagem_submarino):
+    background = pygame.image.load(path.join(img_dir, 'intro-02.png')).convert()
+    background.get_rect()
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+    pygame.time.delay(1000)
+
+    
+    background = pygame.image.load(path.join(img_dir, 'intro-03.png')).convert()
+    background.get_rect()
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+    pygame.time.delay(1000)
+
+    
+    background = pygame.image.load(path.join(img_dir, 'intro-04.png')).convert()
+    background.get_rect()
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+    pygame.time.delay(1000)
+
+    
+    background = pygame.image.load(path.join(img_dir, 'intro-05.png')).convert()
+    background.get_rect()
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+    pygame.time.delay(1000)
+
+    
+    background = pygame.image.load(path.join(img_dir, 'intro-06.png')).convert()
+    background.get_rect()
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+    pygame.time.delay(1000)
+
+
+def fundo_nivel(imagem):
          
-        FPS = velocidade
-        background = imagem
-        #background_rect = background.get_rect()
+        background = pygame.image.load(path.join(img_dir, imagem)).convert()
         background.get_rect()
+        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
  
 def create_blocks(numero_blocos,inimigo):
 # Number of blocks to create
         top = 80 
+        imagem_inimigo= pygame.image.load(inimigo)
 
         blockcount = numero_blocos
         # Five rows of blocks
@@ -61,19 +92,11 @@ def create_blocks(numero_blocos,inimigo):
             # 32 columns of blocks
             for column in range(0, blockcount):
                 # Create a block (color,x,y)
-                block=Block(column*(block_width+20)+1,top, inimigo,tiros)
+                block=Block(column*(block_width+20)+1,top, imagem_inimigo,tiros)
                 blocks.add(block)
                 all_sprites.add(block)
             # Move the top of the next row down
             top += block_height + 2
-    
-
-#font = pygame.font.Font(None, 36)
-# --- Create blocks
- 
-# Five rows of blocks
-  
-
 
 def init_screen(screen):
     # Variável para o ajuste de velocidade
@@ -82,6 +105,7 @@ def init_screen(screen):
     # Carrega o fundo da tela inicial
     background = pygame.image.load(path.join(img_dir, 'intro-01.png')).convert()
     background_rect = background.get_rect()
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
     screen= pygame.display.set_mode((WIDTH, HEIGHT))
 
     #pygame.transform.scale(background, (WIDTH, HEIGHT))
@@ -97,6 +121,7 @@ def init_screen(screen):
                 state = QUIT
                 running = False
             if event.type == pygame.KEYDOWN:
+                introducao()
                 state = GAME
                 running = False
                     
@@ -109,29 +134,39 @@ def init_screen(screen):
 
     return state
                 
-#def draw_text_middle(text, size, color, surface):
-#    label = score_font.render(text, 1, color)
-#     
-#    surface.blit(label, (WIDTH/2 - (label.get_width() / 2), HEIGHT/2 - label.get_height()/2))
-#
-#
-#
-#def main_menu():
-#    
-#    tela = pygame.display.set_mode((WIDTH, HEIGHT))
-#    run = True
-#    state= MENU
-#    while run:
-#        tela.fill((0,0,0))
-#        draw_text_middle('Press any key to begin.', 60, WHITE, tela)
-#        pygame.display.update()
-#        for event in pygame.event.get():
-#            if event.type == pygame.QUIT:
-#                state=DONE
-#                run = False
-# 
-#            if event.type == pygame.KEYDOWN:
-#                state = PLAYING 
+def game_over_screen():
+    clock = pygame.time.Clock()
+
+    background = pygame.image.load(path.join(img_dir, 'game_over.png')).convert()
+    background_rect = background.get_rect()
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+    screen= pygame.display.set_mode((WIDTH, HEIGHT))
+
+
+    running = True
+    while running:      
+        # Ajusta a velocidade do jogo.
+        clock.tick(FPS)       
+        # Processa os eventos (mouse, teclado, botão, etc).
+        for event in pygame.event.get():
+            # Verifica se foi fechado.
+            if event.type == pygame.QUIT:
+                state = QUIT
+                running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_n:
+                    state = GAME
+                    running = False
+
+                    
+        # A cada loop, redesenha o fundo e os sprites
+        screen.fill(BLACK)
+        screen.blit(background, background_rect)
+
+        # Depois de desenhar tudo, inverte o display.
+        pygame.display.flip()
+        
+        return state
 
                             
 # Classe Jogador que representa a beluga
@@ -398,8 +433,8 @@ def game_screen(screen,level):
     clock = pygame.time.Clock()
     
     # Carrega o fundo do jogo
-    background = assets["background_img"]
-    background_rect = background.get_rect()
+    #background = assets["background_img"]
+    #background_rect = background.get_rect()
     
     # Carrega os sons do jogo
     pygame.mixer.music.load(path.join(snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
@@ -459,15 +494,20 @@ def game_screen(screen,level):
    
     
     if level == 1:
-        nivel(50, 'norway.png', 16, 'submarine.png')
+        fundo_nivel('norway.png')
+        FPS = 50
     elif level == 2:
-        nivel(70, 'underwater2.png', 24, 'submarine.png')
+        fundo_nivel('underwater2.png')
+        FPS=75
     elif level == 3:
-        nivel(90, 'atlantis2.png', 32, 'submarine.png')
+        fundo_nivel('atlantis2.png')
+        FPS=100
     elif level == 4:
-        nivel(110, 'area_51_2.1.png', 40, 'submarine.png')
+        fundo_nivel('area_51_2.1.png')
+        FPS=125
     elif level == 5:
-        nivel(130, 'atlantis2.png', 40, 'submarine.png')
+        fundo_nivel('atlantis2.png')
+        FPS=150
 
          
         
