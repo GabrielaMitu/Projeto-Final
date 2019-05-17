@@ -39,43 +39,53 @@ INIT = 0
 GAME = 1
 QUIT = 2
 GAME_OVER = 3
+INTRODUCAO = 4
 
 
 level = 1
 
-def introducao():
 
+def introducao(screen):
+    # Variável para o ajuste de velocidade
+    clock = pygame.time.Clock()
+
+    # Carrega o fundo da tela inicial
     background = pygame.image.load(path.join(img_dir, 'intro-02.png')).convert()
-    background.get_rect()
+    background_rect = background.get_rect()
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    pygame.time.delay(1000)
+    screen= pygame.display.set_mode((WIDTH, HEIGHT))
 
-    
-    background = pygame.image.load(path.join(img_dir, 'intro-03.png')).convert()
-    background.get_rect()
-    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    pygame.time.delay(1000)
+   
+    running = True
+    while running:      
+        # Ajusta a velocidade do jogo.
+        clock.tick(FPS)       
+        # Processa os eventos (mouse, teclado, botão, etc).
+        for event in pygame.event.get():
+            # Verifica se foi fechado.
+            if event.type == pygame.QUIT:
+                state = QUIT
+                running = False
+                
+            i=3
+            while i <= 6:
+                        if event.type == pygame.KEYDOWN:
+                            if event.type == pygame.K_SPACE:
+                                    background = pygame.image.load(path.join(img_dir, 'intro-0{}.png'.format(i))).convert()
+                                    i+=1
+            state = GAME
+            running = False
+                    
+        # A cada loop, redesenha o fundo e os sprites
+        screen.fill(BLACK)
+        screen.blit(background, background_rect)
 
-    
-    background = pygame.image.load(path.join(img_dir, 'intro-04.png')).convert()
-    background.get_rect()
-    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    pygame.time.delay(1000)
+        # Depois de desenhar tudo, inverte o display.
+        pygame.display.flip()
 
-    
-    background = pygame.image.load(path.join(img_dir, 'intro-05.png')).convert()
-    background.get_rect()
-    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    pygame.time.delay(1000)
+        return state
+                
 
-    
-    background = pygame.image.load(path.join(img_dir, 'intro-06.png')).convert()
-    background.get_rect()
-    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    pygame.time.delay(1000)
-    
-    
-def introducao():
 
     background = pygame.image.load(path.join(img_dir, 'intro-02.png')).convert()
     background.get_rect()
@@ -119,7 +129,7 @@ def fundo_nivel(imagem):
         
 
 
- 
+# 
 def create_blocks(numero_blocos,inimigo, tiros, blocks, all_sprites):
 # Number of blocks to create
         top = 80 
@@ -160,7 +170,7 @@ def init_screen(screen):
                 state = QUIT
                 running = False
             if event.type == pygame.KEYDOWN:
-                state = GAME
+                state = INTRODUCAO
                 running = False
                     
         # A cada loop, redesenha o fundo e os sprites
@@ -496,30 +506,30 @@ def game_screen(screen,level):
     
     
      
-    # The top of the block (y position)
-    top = 80
-     
-    # Number of blocks to create
-    blockcount = 32
-     
+#    # The top of the block (y position)
+#    top = 80
+#     
+#    # Number of blocks to create
+#    blockcount = 32
+#     
+##    
+#    font = pygame.font.Font(None, 36)
+#    
+##    
+#    # --- Create blocks
+#     
+#    # Five rows of blocks
+#    for row in range(8):
+#        # 32 columns of blocks
+#        for column in range(0, 19):
+#            # Create a block (color,x,y)
+#            block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
+#            blocks.add(block)
+#            all_sprites.add(block)
+#        # Move the top of the next row down
+#        top += block_height + 2
     
-    font = pygame.font.Font(None, 36)
-    
-    
-    # --- Create blocks
-     
-    # Five rows of blocks
-    for row in range(5):
-        # 32 columns of blocks
-        for column in range(0, blockcount):
-            # Create a block (color,x,y)
-            block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
-            blocks.add(block)
-            all_sprites.add(block)
-        # Move the top of the next row down
-        top += block_height + 2
-    
-    
+#    
     # Loop principal.
     pygame.mixer.music.play(loops=-1)
     score = 0
@@ -535,7 +545,33 @@ def game_screen(screen,level):
     if level == 1:
         background = fundo_nivel('norway.png')
         FPS = 50
-        create_blocks(4,'submarine-prata.png', tiros, blocks, all_sprites)
+        #create_blocks(4,'submarine-prata.png', tiros, blocks, all_sprites)
+         # The top of the block (y position)
+        top = 80
+         
+        # Number of blocks to create
+        blockcount = 32
+         
+    #    
+        font = pygame.font.Font(None, 36)
+        
+    #    
+        # --- Create blocks
+         
+        # Five rows of blocks
+        for row in range(8):
+            # 32 columns of blocks
+            for column in range(0, 19):
+                # Create a block (color,x,y)
+                block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
+                blocks.add(block)
+                all_sprites.add(block)
+            # Move the top of the next row down
+            top += block_height + 2
+            
+            
+            
+            
     elif level == 2:
         fundo_nivel('underwater2.png')
         create_blocks(5,'submarine.png', tiros)
@@ -663,6 +699,7 @@ def game_screen(screen,level):
         
                     
         # A cada loop, redesenha o fundo e os sprites
+        background_rect=background.get_rect()
         screen.fill(BLACK)
         screen.blit(background, background_rect)
         all_sprites.draw(screen)
@@ -704,6 +741,8 @@ try:
     while state != QUIT:
         if state == INIT:
             state = init_screen(screen)
+        if state == INTRODUCAO:
+            introducao(screen)
         elif state == GAME:
             state = game_screen(screen,level)
         elif state == GAME_OVER:
