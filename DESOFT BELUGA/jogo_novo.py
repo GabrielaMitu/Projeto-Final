@@ -38,6 +38,7 @@ block_height = 15
 INIT = 0
 GAME = 1
 QUIT = 2
+GAME_OVER = 3
 
 
 level = 1
@@ -72,6 +73,7 @@ def introducao():
     background.get_rect()
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
     pygame.time.delay(1000)
+    
 
 
 def fundo_nivel(imagem):
@@ -79,12 +81,14 @@ def fundo_nivel(imagem):
         background = pygame.image.load(path.join(img_dir, imagem)).convert()
         background.get_rect()
         background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+        
+
 
  
 def create_blocks(numero_blocos,inimigo):
 # Number of blocks to create
         top = 80 
-        imagem_inimigo= pygame.image.load(inimigo)
+        imagem_inimigo= pygame.image.load(path.join(img_dir, inimigo)).convert()
 
         blockcount = numero_blocos
         # Five rows of blocks
@@ -134,7 +138,7 @@ def init_screen(screen):
 
     return state
                 
-def game_over_screen():
+def game_over_screen(screen):
     clock = pygame.time.Clock()
 
     background = pygame.image.load(path.join(img_dir, 'game_over.png')).convert()
@@ -496,18 +500,24 @@ def game_screen(screen,level):
     if level == 1:
         fundo_nivel('norway.png')
         FPS = 50
+        create_blocks(32,'submarine-prata.png')
     elif level == 2:
         fundo_nivel('underwater2.png')
+        create_blocks(32,'submarine.png')
         FPS=75
     elif level == 3:
         fundo_nivel('atlantis2.png')
         FPS=100
+        create_blocks(32,'submarine.png')
     elif level == 4:
         fundo_nivel('area_51_2.1.png')
+        create_blocks(32,'submarine-azul.png')
         FPS=125
     elif level == 5:
         fundo_nivel('atlantis2.png')
         FPS=150
+        create_blocks(32,'submarine-verde.png')
+
 
          
         
@@ -596,7 +606,6 @@ def game_screen(screen,level):
             
     
                 
-            
             if lives == 0:
                 state = DONE
                     
@@ -624,9 +633,9 @@ def game_screen(screen,level):
                     state = PLAYING
                     player = Player(assets["player_img"])
                     all_sprites.add(player)
-       
-             
-        
+                    
+            
+     
         # Depois de processar os eventos.
         # Atualiza a acao de cada sprite.
         all_sprites.update()
@@ -677,6 +686,8 @@ try:
             state = init_screen(screen)
         elif state == GAME:
             state = game_screen(screen,level)
+        elif state == GAME_OVER:
+            state= game_over_screen(screen)
         else:
             state = QUIT
 finally:
