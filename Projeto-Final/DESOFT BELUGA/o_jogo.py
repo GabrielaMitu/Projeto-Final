@@ -296,10 +296,10 @@ try:
         clock.tick(FPS)
 
         if state == PLAYING:
-            hits = pygame.sprite.groupcollide(blocks, balls, True, False)
+            hits = pygame.sprite.groupcollide(balls, blocks, False, True)
             for hit in hits: # Pode haver mais de um
                 score+=100
-                ball.bounce(False)
+                hit.bounce(False)
 
             # Processa os eventos (mouse, teclado, botão, etc).
             for event in pygame.event.get():
