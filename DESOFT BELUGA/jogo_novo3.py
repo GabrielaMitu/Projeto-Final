@@ -29,7 +29,7 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0    , 255)
 YELLOW = (255, 255, 0)
  
-# Tamanho dos blocos
+# Size of break-out blocks
 block_width = 23
 block_height = 15
 
@@ -74,6 +74,7 @@ def introducao(screen):
                 if event.key == pygame.K_SPACE:
                     background = pygame.image.load(path.join(img_dir, 'intro-0{}.png'.format(i))).convert()
                     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+                    print(i)
                     i+=1
                     if i >= 6:
                         
@@ -93,24 +94,32 @@ def introducao(screen):
 
    
 def fundo_nivel(imagem):
+         
         background = pygame.image.load(path.join(img_dir, imagem)).convert()
         background.get_rect()
-        background = pygame.transform.scale(background, (WIDTH, HEIGHT))    
+        background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+        
         return background
         
 
 
 # 
 def create_blocks(numero_blocos,inimigo, tiros, blocks, all_sprites):
+# Number of blocks to create
         top = 80 
         imagem_inimigo= pygame.image.load(path.join(img_dir, inimigo)).convert()
-        blockcount=14
-        for row in range(7):
-                for column in range(0, blockcount):
-                    block=Block(column*(block_width+20)+1,top, (imagem_inimigo,tiros)) 
-                    blocks.add(block)
-                    all_sprites.add(block)
-                top += block_height + 2
+
+        blockcount = numero_blocos
+        # Five rows of blocks
+        for row in range(blockcount):
+            # 32 columns of blocks
+            for column in range(0, 32):
+                # Create a block (color,x,y)
+                block=Block(column*(block_width+20)+1,top, imagem_inimigo,tiros)
+                blocks.add(block)
+                all_sprites.add(block)
+            # Move the top of the next row down
+            top += block_height + 2
 
 def init_screen(screen):
     # Variável para o ajuste de velocidade
@@ -120,7 +129,9 @@ def init_screen(screen):
     background = pygame.image.load(path.join(img_dir, 'intro-01.png')).convert()
     background_rect = background.get_rect()
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    
+
+    #pygame.transform.scale(background, (WIDTH, HEIGHT))
+
     running = True
     while running:      
         # Ajusta a velocidade do jogo.
@@ -145,12 +156,12 @@ def init_screen(screen):
     return state
                 
 def game_over_screen(screen):
-    
     clock = pygame.time.Clock()
 
     background = pygame.image.load(path.join(img_dir, 'game_over.png')).convert()
     background_rect = background.get_rect()
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+    screen= pygame.display.set_mode((WIDTH, HEIGHT))
 
 
     running = True
@@ -168,6 +179,7 @@ def game_over_screen(screen):
                     state = GAME
                     running = False
 
+                    
         # A cada loop, redesenha o fundo e os sprites
         screen.fill(BLACK)
         screen.blit(background, background_rect)
@@ -176,7 +188,8 @@ def game_over_screen(screen):
         pygame.display.flip()
         
         return state
-                        
+
+                            
 # Classe Jogador que representa a beluga
 class Player(pygame.sprite.Sprite):
     
@@ -227,26 +240,44 @@ class Block(pygame.sprite.Sprite):
     def __init__(self, x, y, submarine_img, tiros):
        
         self.tiros=tiros
+        
+        # Call the parent class (Sprite) constructor
         pygame.sprite.Sprite.__init__(self)
+ 
+        # Create the image of the block of appropriate size
+        # The width and height are sent as a list for the first parameter.
         self.image = pygame.transform.scale(submarine_img, (45, 30))
+        
         self.image.set_colorkey(BLACK)
+ 
+ 
+        # Fetch the rectangle object that has the dimensions of the image
         self.rect = self.image.get_rect()
+ 
+        # Move the top left of the rectangle to x,y.
+        # This is where our block will appear..
         self.rect.x = x
         self.rect.y = y
         
     def update(self):
         assets = load_assets(img_dir, snd_dir, fnt_dir)
 
+
+            # Have a random 1 in 200 change of shooting each frame
         if random.randrange(20000) == 0:
             tiro=Tiro(self.rect.centerx, self.rect.bottom, assets["tiros_img"])
             self.tiros.add(tiro)
-    
+            
+
+
         
 class Tiro(pygame.sprite.Sprite):
     def __init__(self, x, y, tiro_img):
         
         pygame.sprite.Sprite.__init__(self)
-          
+        
+        # Diminuindo o tamanho da imagem.
+        #random.randrange(200) == 0:
         self.image = pygame.transform.scale(tiro_img, (10, 10))
         self.image.set_colorkey(BLACK)
         self.rect= self.image.get_rect()
@@ -260,40 +291,56 @@ class Tiro(pygame.sprite.Sprite):
     
         
 class Ball(pygame.sprite.Sprite):
+    # Constructor. Pass in the color of the block, and its x and y position
     def __init__(self, x):
+        # Call the parent class (Sprite) constructor
         pygame.sprite.Sprite.__init__(self)
 
+        # Speed in pixels per cycle
         self.speed = 10.0
 
+        # Floating point representation of where the ball is
         self.x = x
         self.y = 500
+
+        # Direction of ball (in degrees)
+        # self.direction = 45
 
         self.width=10
         self.height=10
 
+        # Create the image of the ball
         self.image = pygame.Surface([self.width, self.height])
 
+        # Color the ball
         self.image.fill(WHITE)
 
+        # Get a rectangle object that shows where our image is
         self.rect = self.image.get_rect()
 
         self.xspeed = math.sqrt(50)
         self.yspeed = math.sqrt(50)
 
+        # Get attributes for the height/width of the screen
         self.screenheight = pygame.display.get_surface().get_height()
         self.screenwidth = pygame.display.get_surface().get_width()
 
+    # This function will bounce the ball off a horizontal surface (not a vertical one)
     def bounce(self,lado):
-        
+        # self.direction = (180-self.direction)%360
+        # self.direction -= diff
         if lado:
             self.xspeed = -self.xspeed
         else:
             self.yspeed = -self.yspeed
 
+    # Update the position of the ball
     def update(self):
+        # Change the position (x and y) according to the speed and direction
         self.x += self.xspeed
         self.y -= self.yspeed
 
+        # Move the image to where our x and y are
         self.rect.x = self.x
         self.rect.y = self.y
 
@@ -395,6 +442,8 @@ def load_assets(img_dir, snd_dir, fnt_dir):
 
 def game_screen(screen,level):
     
+    # Tamanho da tela.
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
     
     # Nome do jogo
     pygame.display.set_caption("BELUGA")
@@ -404,6 +453,10 @@ def game_screen(screen,level):
     
     # Variável para o ajuste de velocidade
     clock = pygame.time.Clock()
+    
+    # Carrega o fundo do jogo
+    #background = assets["background_img"]
+    #background_rect = background.get_rect()
     
     # Carrega os sons do jogo
     pygame.mixer.music.load(path.join(snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
@@ -424,6 +477,32 @@ def game_screen(screen,level):
     tiros=pygame.sprite.Group()
     balls = pygame.sprite.Group()
     
+    
+     
+#    # The top of the block (y position)
+#    top = 80
+#     
+#    # Number of blocks to create
+#    blockcount = 32
+#     
+##    
+#    font = pygame.font.Font(None, 36)
+#    
+##    
+#    # --- Create blocks
+#     
+#    # Five rows of blocks
+#    for row in range(8):
+#        # 32 columns of blocks
+#        for column in range(0, 19):
+#            # Create a block (color,x,y)
+#            block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
+#            blocks.add(block)
+#            all_sprites.add(block)
+#        # Move the top of the next row down
+#        top += block_height + 2
+    
+#    
     # Loop principal.
     pygame.mixer.music.play(loops=-1)
     score = 0
@@ -546,8 +625,7 @@ def game_screen(screen,level):
                     lives -= 1
                     ball.kill()
                                                     
-            if len(blocks) == 0:
-                    state = PASSOU_NIVEL_1
+                
 
                     
             
@@ -584,9 +662,8 @@ def game_screen(screen,level):
                 level +=1
             else:
                 state = DONE
-                
-     
-        
+                    
+            
      
         # Depois de processar os eventos.
         # Atualiza a acao de cada sprite.
