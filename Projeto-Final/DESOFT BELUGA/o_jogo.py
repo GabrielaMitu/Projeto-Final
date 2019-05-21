@@ -21,7 +21,7 @@ environ['SDL_VIDEO_CENTERED'] = '1'
 
 
 # Dados gerais do jogo.
-WIDTH = 800 # Largura da tela
+WIDTH = 830 # Largura da tela
 HEIGHT = 600 # Altura da tela
 FPS = 60 # Frames por segundo
 
@@ -34,8 +34,8 @@ BLUE = (0, 0    , 255)
 YELLOW = (255, 255, 0)
 
 # Size of break-out blocks
-block_width = 23
-block_height = 15
+block_width = 40    #23
+block_height = 25   #15
 
 
 def draw_text_middle(text, size, color, surface):
@@ -213,6 +213,7 @@ clock = pygame.time.Clock()
 # Carrega o fundo do jogo
 background = assets["background_img"]
 background_rect = background.get_rect()
+background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
 # Carrega os sons do jogo
 # pygame.mixer.music.load(path.join(snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
@@ -236,7 +237,7 @@ balls = pygame.sprite.Group()
 top = 80
 
 # Number of blocks to create
-blockcount = 32
+blockcount = 14
 
 font = pygame.font.Font(None, 36)
 
@@ -258,14 +259,15 @@ try:
     # Loop principal.
     # pygame.mixer.music.play(loops=-1)
     score = 0
-    lives = 3
+    lives = 99
 
     #Estados do jogo
     BOLA_NA_BELUGA = 0
     PLAYING = 1
     EXPLODING = 2
     DONE = 3
-    PASSOU_NIVEL = 4
+    PASSOU_NIVEL_1 = 3
+    PASSOU_NIVEL_2= 5
     PAUSED = 5
     MENU=6
 
@@ -339,8 +341,8 @@ try:
                 ball.bounce(False)
 
                 # Game ends if all the blocks are gone
-                if len(blocks) == 0:
-                    state = DONE
+            if len(blocks) == 0:
+                    state = PASSOU_NIVEL_1
 
             for ball in balls:
                 if ball.y > HEIGHT:
@@ -374,7 +376,208 @@ try:
                     state = PLAYING
                     player = Player(assets["player_img"])
                     all_sprites.add(player)
+#---------------------------------            
+        if state==PASSOU_NIVEL_1:
+            blockcount=14
+            top=80
+            velocidade=random.randint(5,8)
+            state=PLAYING
+            for row in range(7):
+    # 32 columns of blocks
+                for column in range(0, blockcount):
+                    # Create a block (color,x,y)
+                    block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
+                    blocks.add(block)
+                    all_sprites.add(block)
+                # Move the top of the next row down
+                top += block_height + 2
+            
+            assets["background_img"] = pygame.image.load(path.join(img_dir, 'area_51_2.png')).convert()
+            background = assets["background_img"]
+            background_rect = background.get_rect()
+            background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+            hits = pygame.sprite.groupcollide(balls, blocks, False, True)
+            for hit in hits: # Pode haver mais de um
+                score+=100
+                hit.bounce(False)
 
+            # Processa os eventos (mouse, teclado, botão, etc).
+            for event in pygame.event.get():
+
+                # Verifica se foi fechado.
+                if event.type == pygame.QUIT:
+                    state = DONE
+
+                # Verifica se apertou alguma tecla.
+                if event.type == pygame.KEYDOWN:
+                    # Dependendo da tecla, altera a velocidade.
+                    if event.key == pygame.K_LEFT:
+                        player.speedx = -8
+                    if event.key == pygame.K_RIGHT:
+                        player.speedx = 8
+                    if event.key == pygame.K_SPACE:
+                        print()
+                        ball = Ball(player.rect.x)
+
+                        all_sprites.add(ball)
+                        balls.add(ball)
+
+                       # pew_sound.play()
+                    if event.key ==pygame.K_ESCAPE:
+                        state = PAUSED
+
+                # Verifica se soltou alguma tecla.
+                if event.type == pygame.KEYUP:
+                    # Dependendo da tecla, altera a velocidade.
+                    if event.key == pygame.K_LEFT:
+                        player.speedx = 0
+                    if event.key == pygame.K_RIGHT:
+                        player.speedx = 0
+
+            # See if the ball hits the player paddle
+            for ball in pygame.sprite.spritecollide(player, balls, False):
+                ball.bounce(False)
+
+                # Game ends if all the blocks are gone
+            if len(blocks) == 0:
+                    state = PASSOU_NIVEL_2
+
+            for ball in balls:
+                if ball.y > HEIGHT:
+                    lives -= 1
+                    ball.kill()
+
+            if lives <= 0:
+                state = DONE
+
+               # Verifica se houve colisão entre nave e meteoro
+            hits = pygame.sprite.spritecollide(player, tiros, False, pygame.sprite.collide_circle)
+            if hits:
+                # Toca o som da colisão
+                # boom_sound.play()
+                player.kill()
+                lives -= 1
+                for ball in balls:
+                    ball.kill()
+                explosao = Explosion(player.rect.center, assets["explosion_anim"])
+                all_sprites.add(explosao)
+                state = EXPLODING
+                explosion_tick = pygame.time.get_ticks()
+                explosion_duration = explosao.frame_ticks * len(explosao.explosion_anim) + 400
+            class Block(pygame.sprite.Sprite):
+                def __init__(self, x, y, submarine_img, tiros):
+
+                    self.tiros=tiros
+            
+                    # Call the parent class (Sprite) constructor
+                    pygame.sprite.Sprite.__init__(self)
+            
+                    # Create the image of the block of appropriate size
+                    # The width and height are sent as a list for the first parameter.
+                    self.image = pygame.transform.scale(submarine_img, (45, 30))
+            
+                    self.image.set_colorkey(BLACK)
+            
+            
+                    # Fetch the rectangle object that has the dimensions of the image
+                    self.rect = self.image.get_rect()
+            
+                    # Move the top left of the rectangle to x,y.
+                    # This is where our block will appear..
+                    self.rect.x = x
+                    self.rect.y = y
+
+                def update(self):
+
+            # Have a random 1 in 200 change of shooting each frame
+                    if random.randrange(10000) == 0:
+                        tiro=Tiro(self.rect.centerx, self.rect.bottom, assets["tiros_img"])
+                        self.tiros.add(tiro)
+            
+            
+            
+        if state==PASSOU_NIVEL_2:
+            blockcount=14
+            top=80
+            for row in range(5):
+    # 32 columns of blocks
+                for column in range(0, blockcount):
+                    # Create a block (color,x,y)
+                    block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
+                    blocks.add(block)
+                    all_sprites.add(block)
+                # Move the top of the next row down
+                top += block_height + 2
+            state=PLAYING
+            assets["background_img"] = pygame.image.load(path.join(img_dir, 'white_house2.png')).convert()
+            background = assets["background_img"]
+            background_rect = background.get_rect()
+            background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+            
+            hits = pygame.sprite.groupcollide(balls, blocks, False, True)
+            for hit in hits: # Pode haver mais de um
+                score+=100
+                hit.bounce(False)
+            for event in pygame.event.get():
+                # Verifica se foi fechado.
+                if event.type == pygame.QUIT:
+                    state = DONE
+                if event.type == pygame.KEYDOWN:
+                    # Dependendo da tecla, altera a velocidade.
+                    if event.key == pygame.K_LEFT:
+                        player.speedx = -8
+                    if event.key == pygame.K_RIGHT:
+                        player.speedx = 8
+                    if event.key == pygame.K_SPACE:
+                        print()
+                        ball = Ball(player.rect.x)
+
+                        all_sprites.add(ball)
+                        balls.add(ball)
+
+                       # pew_sound.play()
+                    if event.key ==pygame.K_ESCAPE:
+                        state = PAUSED
+
+                # Verifica se soltou alguma tecla.
+                if event.type == pygame.KEYUP:
+                    # Dependendo da tecla, altera a velocidade.
+                    if event.key == pygame.K_LEFT:
+                        player.speedx = 0
+                    if event.key == pygame.K_RIGHT:
+                        player.speedx = 0
+                for ball in pygame.sprite.spritecollide(player, balls, False):
+                    ball.bounce(False)
+
+                    # Game ends if all the blocks are gone
+                if len(blocks) == 0:
+                        state = DONE
+        
+                for ball in balls:
+                    if ball.y > HEIGHT:
+                        lives -= 1
+                        ball.kill()
+        
+                if lives <= 0:
+                    state = DONE
+        
+                   # Verifica se houve colisão entre nave e meteoro
+                hits = pygame.sprite.spritecollide(player, tiros, False, pygame.sprite.collide_circle)
+                if hits:
+                    # Toca o som da colisão
+                    # boom_sound.play()
+                    player.kill()
+                    lives -= 1
+                    for ball in balls:
+                        ball.kill()
+                    explosao = Explosion(player.rect.center, assets["explosion_anim"])
+                    all_sprites.add(explosao)
+                    state = EXPLODING
+                    explosion_tick = pygame.time.get_ticks()
+                    explosion_duration = explosao.frame_ticks * len(explosao.explosion_anim) + 400
+
+            
+#-------------------------
         # Depois de processar os eventos.
         # Atualiza a acao de cada sprite.
         all_sprites.update()
