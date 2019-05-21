@@ -53,13 +53,15 @@ def introducao(screen):
     background = pygame.image.load(path.join(img_dir, 'intro-02.png')).convert()
     background_rect = background.get_rect()
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    screen= pygame.display.set_mode((WIDTH, HEIGHT))
 
    
     running = True
+    i=3
+
     while running:      
         # Ajusta a velocidade do jogo.
-        clock.tick(FPS)       
+        clock.tick(FPS)  
+        print(i)
         # Processa os eventos (mouse, teclado, botão, etc).
         for event in pygame.event.get():
             # Verifica se foi fechado.
@@ -67,15 +69,18 @@ def introducao(screen):
                 state = QUIT
                 running = False
                 
-            i=3
-            while i <= 6:
-                        if event.type == pygame.KEYDOWN:
-                            if event.type == pygame.K_SPACE:
-                                    background = pygame.image.load(path.join(img_dir, 'intro-0{}.png'.format(i))).convert()
-                                    i+=1
-            state = GAME
-            running = False
-                    
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    background = pygame.image.load(path.join(img_dir, 'intro-0{}.png'.format(i))).convert()
+                    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+                    print(i)
+                    i+=1
+                    if i >= 6:
+                        
+                        state = GAME
+                        running = False
+                                
         # A cada loop, redesenha o fundo e os sprites
         screen.fill(BLACK)
         screen.blit(background, background_rect)
@@ -83,42 +88,11 @@ def introducao(screen):
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
 
-        return state
+    return state
                 
 
 
-    background = pygame.image.load(path.join(img_dir, 'intro-02.png')).convert()
-    background.get_rect()
-    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    pygame.time.delay(1000)
-
-    
-    background = pygame.image.load(path.join(img_dir, 'intro-03.png')).convert()
-    background.get_rect()
-    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    pygame.time.delay(1000)
-
-    
-    background = pygame.image.load(path.join(img_dir, 'intro-04.png')).convert()
-    background.get_rect()
-    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    pygame.time.delay(1000)
-
-    
-    background = pygame.image.load(path.join(img_dir, 'intro-05.png')).convert()
-    background.get_rect()
-    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    pygame.time.delay(1000)
-
-    
-    background = pygame.image.load(path.join(img_dir, 'intro-06.png')).convert()
-    background.get_rect()
-    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    pygame.time.delay(1000)
-    
-    
-
-
+   
 def fundo_nivel(imagem):
          
         background = pygame.image.load(path.join(img_dir, imagem)).convert()
@@ -155,7 +129,6 @@ def init_screen(screen):
     background = pygame.image.load(path.join(img_dir, 'intro-01.png')).convert()
     background_rect = background.get_rect()
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    screen= pygame.display.set_mode((WIDTH, HEIGHT))
 
     #pygame.transform.scale(background, (WIDTH, HEIGHT))
 
@@ -742,7 +715,7 @@ try:
         if state == INIT:
             state = init_screen(screen)
         if state == INTRODUCAO:
-            introducao(screen)
+            state=introducao(screen)
         elif state == GAME:
             state = game_screen(screen,level)
         elif state == GAME_OVER:
