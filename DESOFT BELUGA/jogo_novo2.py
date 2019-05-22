@@ -44,6 +44,10 @@ INTRODUCAO = 4
 
 level = 1
 
+def draw_text_middle(text, size, color, surface):
+    label = score_font.render(text, 1, color)
+
+    surface.blit(label, (WIDTH/2 - (label.get_width() / 2), HEIGHT/2 - label.get_height()/2))
 
 def introducao(screen):
     # Variável para o ajuste de velocidade
@@ -61,7 +65,6 @@ def introducao(screen):
     while running:      
         # Ajusta a velocidade do jogo.
         clock.tick(FPS)  
-        print(i)
         # Processa os eventos (mouse, teclado, botão, etc).
         for event in pygame.event.get():
             # Verifica se foi fechado.
@@ -393,21 +396,18 @@ def load_assets(img_dir, snd_dir, fnt_dir):
 
 
 
-def game_screen(screen,level):
+def game_screen(screen,level, assets):
     
     
     # Nome do jogo
     pygame.display.set_caption("BELUGA")
     
-    # Carrega todos os assets uma vez só e guarda em um dicionário
-    assets = load_assets(img_dir, snd_dir, fnt_dir)
+
     
     # Variável para o ajuste de velocidade
     clock = pygame.time.Clock()
     
     # Carrega os sons do jogo
-    pygame.mixer.music.load(path.join(snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
-    pygame.mixer.music.set_volume(0.4)
     boom_sound = assets["boom_sound"]
     
     
@@ -425,7 +425,6 @@ def game_screen(screen,level):
     balls = pygame.sprite.Group()
     
     # Loop principal.
-    pygame.mixer.music.play(loops=-1)
     score = 0
     lives = 3
 
@@ -487,6 +486,7 @@ def game_screen(screen,level):
          
         
     state = PLAYING
+    level=1
     while state != DONE:
         
         # Ajusta a velocidade do jogo.
@@ -514,7 +514,6 @@ def game_screen(screen,level):
                     if event.key == pygame.K_RIGHT:
                         player.speedx = 8
                     if event.key == pygame.K_SPACE:
-                        print()
                         ball = Ball(player.rect.x)
 
                         all_sprites.add(ball)
@@ -547,13 +546,15 @@ def game_screen(screen,level):
                     ball.kill()
                                                     
             if len(blocks) == 0:
-                    state = PASSOU_NIVEL_1
+                    if level<=5:
+                        level+=1
+                    else:
+                        state=DONE
 
-                    
-            
+                                
     
-                    
-               # Verifica se houve colisão entre nave e meteoro
+     #-------------------               
+#                Verifica se houve colisão entre nave e meteoro
             hits = pygame.sprite.spritecollide(player, tiros, False, pygame.sprite.collide_circle)
             if hits:
                 # Toca o som da colisão
@@ -567,7 +568,7 @@ def game_screen(screen,level):
                 state = EXPLODING
                 explosion_tick = pygame.time.get_ticks()
                 explosion_duration = explosao.frame_ticks * len(explosao.explosion_anim) + 400
-            
+#            
         if state == EXPLODING:
             now = pygame.time.get_ticks()
             if now - explosion_tick > explosion_duration:
@@ -578,14 +579,9 @@ def game_screen(screen,level):
                     player = Player(assets["player_img"])
                     all_sprites.add(player)
                     
-        # Game ends if all the blocks are gone
-        if len(blocks) == 0:
-            if level <= 5:
-                level +=1
-            else:
-                state = DONE
+
                 
-     
+     #----------------------
         
      
         # Depois de processar os eventos.
@@ -630,6 +626,8 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Nome do jogo
 pygame.display.set_caption("FBI")
+# Carrega todos os assets uma vez só e guarda em um dicionário
+assets = load_assets(img_dir, snd_dir, fnt_dir)
 
 # Comando para evitar travamentos.
 try:
@@ -640,7 +638,7 @@ try:
         if state == INTRODUCAO:
             state=introducao(screen)
         elif state == GAME:
-            state = game_screen(screen,level)
+            state = game_screen(screen,level, assets)
         elif state == GAME_OVER:
             state= game_over_screen(screen)
         else:
