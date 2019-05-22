@@ -195,8 +195,6 @@ class Player(pygame.sprite.Sprite):
         # Diminuindo o tamanho da imagem.
 
         self.image = pygame.transform.scale(player_img, (70, 70))
-
-        self.image = pygame.transform.scale(player_img, (70, 70))
         
         # Deixando transparente.
         self.image.set_colorkey(BLACK)
@@ -226,20 +224,31 @@ class Player(pygame.sprite.Sprite):
                     
 
 class Block(pygame.sprite.Sprite):
-
     def __init__(self, x, y, submarine_img, tiros):
-       
+
         self.tiros=tiros
+
+        # Call the parent class (Sprite) constructor
         pygame.sprite.Sprite.__init__(self)
+
+        # Create the image of the block of appropriate size
+        # The width and height are sent as a list for the first parameter.
         self.image = pygame.transform.scale(submarine_img, (45, 30))
+
         self.image.set_colorkey(BLACK)
+
+
+        # Fetch the rectangle object that has the dimensions of the image
         self.rect = self.image.get_rect()
+
+        # Move the top left of the rectangle to x,y.
+        # This is where our block will appear..
         self.rect.x = x
         self.rect.y = y
-        
-    def update(self):
-        assets = load_assets(img_dir, snd_dir, fnt_dir)
 
+    def update(self):
+
+            # Have a random 1 in 200 change of shooting each frame
         if random.randrange(20000) == 0:
             tiro=Tiro(self.rect.centerx, self.rect.bottom, assets["tiros_img"])
             self.tiros.add(tiro)
@@ -247,9 +256,11 @@ class Block(pygame.sprite.Sprite):
         
 class Tiro(pygame.sprite.Sprite):
     def __init__(self, x, y, tiro_img):
-        
+
         pygame.sprite.Sprite.__init__(self)
-          
+
+        # Diminuindo o tamanho da imagem.
+        #random.randrange(200) == 0:
         self.image = pygame.transform.scale(tiro_img, (10, 10))
         self.image.set_colorkey(BLACK)
         self.rect= self.image.get_rect()
@@ -257,46 +268,63 @@ class Tiro(pygame.sprite.Sprite):
         self.rect.y = y
         velocidade=random.randint(1,7)
         self.speed_y=velocidade
-    
+
     def update(self):
         self.rect.y+=self.speed_y
+
     
         
 class Ball(pygame.sprite.Sprite):
+    # Constructor. Pass in the color of the block, and its x and y position
     def __init__(self, x):
+        # Call the parent class (Sprite) constructor
         pygame.sprite.Sprite.__init__(self)
 
+        # Speed in pixels per cycle
         self.speed = 10.0
 
+        # Floating point representation of where the ball is
         self.x = x
         self.y = 500
+
+        # Direction of ball (in degrees)
+        # self.direction = 45
 
         self.width=10
         self.height=10
 
+        # Create the image of the ball
         self.image = pygame.Surface([self.width, self.height])
 
+        # Color the ball
         self.image.fill(WHITE)
 
+        # Get a rectangle object that shows where our image is
         self.rect = self.image.get_rect()
 
         self.xspeed = math.sqrt(50)
         self.yspeed = math.sqrt(50)
 
+        # Get attributes for the height/width of the screen
         self.screenheight = pygame.display.get_surface().get_height()
         self.screenwidth = pygame.display.get_surface().get_width()
 
+    # This function will bounce the ball off a horizontal surface (not a vertical one)
     def bounce(self,lado):
-        
+        # self.direction = (180-self.direction)%360
+        # self.direction -= diff
         if lado:
             self.xspeed = -self.xspeed
         else:
             self.yspeed = -self.yspeed
 
+    # Update the position of the ball
     def update(self):
+        # Change the position (x and y) according to the speed and direction
         self.x += self.xspeed
         self.y -= self.yspeed
 
+        # Move the image to where our x and y are
         self.rect.x = self.x
         self.rect.y = self.y
 
