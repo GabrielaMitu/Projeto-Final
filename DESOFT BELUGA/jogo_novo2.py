@@ -17,9 +17,9 @@ snd_dir = path.join(path.dirname(__file__), 'snd')
 fnt_dir = path.join(path.dirname(__file__), 'font')
 
 # Dados gerais do jogo.
-WIDTH = 800 # Largura da tela
+WIDTH = 830 # Largura da tela
 HEIGHT = 600 # Altura da tela
-FPS = 60 # Frames por segundo
+FPS = 100 # Frames por segundo
 
 # Define algumas variáveis com as cores básicas
 WHITE = (255, 255, 255)
@@ -30,8 +30,8 @@ BLUE = (0, 0    , 255)
 YELLOW = (255, 255, 0)
  
 # Tamanho dos blocos
-block_width = 23
-block_height = 15
+block_width = 40
+block_height = 25
 
 
 # Estados para controle do fluxo da aplicação
@@ -107,8 +107,8 @@ def fundo_nivel(imagem):
 def create_blocks(numero_blocos,inimigo, tiros, blocks, all_sprites):
         top = 80 
         imagem_inimigo= pygame.image.load(path.join(img_dir, inimigo)).convert()
-        blockcount=14
-        for row in range(7):
+        blockcount=10
+        for row in range(5):
                 for column in range(0, blockcount):
                     block=Block(column*(block_width+20)+1,top, (imagem_inimigo,tiros)) 
                     blocks.add(block)
@@ -451,10 +451,12 @@ def game_screen(screen,level, assets):
     blocks = pygame.sprite.Group()
     tiros=pygame.sprite.Group()
     balls = pygame.sprite.Group()
+    pygame.mixer.music.load(path.join(snd_dir, 'HawaiiFive-O-ThemeSongFullVersion.mp3'))
+    pygame.mixer.music.set_volume(0.4)
     
     # Loop principal.
     score = 0
-    lives = 3
+    lives = 99
 
     #Estados do jogo
     PLAYING = 0
@@ -465,24 +467,19 @@ def game_screen(screen,level, assets):
     
     if level == 1:
         background = fundo_nivel('norway.png')
-        FPS = 50
+        FPS = 60
         #create_blocks(4,'submarine-prata.png', tiros, blocks, all_sprites)
          # The top of the block (y position)
         top = 80
-         
-        # Number of blocks to create
-        blockcount = 32
-         
-    #    
+
         font = pygame.font.Font(None, 36)
         
-    #    
         # --- Create blocks
          
         # Five rows of blocks
-        for row in range(8):
+        for row in range(5):
             # 32 columns of blocks
-            for column in range(0, 19):
+            for column in range(0, 14):
                 # Create a block (color,x,y)
                 block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
                 blocks.add(block)
@@ -494,9 +491,20 @@ def game_screen(screen,level, assets):
             
             
     elif level == 2:
-        fundo_nivel('underwater2.png')
-        create_blocks(5,'submarine.png', tiros)
-        FPS=75
+        background=fundo_nivel('underwater2.png')
+        create_blocks(8,'submarine.png', tiros)
+        top=80
+        for row in range(6):
+            # 32 columns of blocks
+            for column in range(0, 14):
+                # Create a block (color,x,y)
+                block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
+                blocks.add(block)
+                all_sprites.add(block)
+            # Move the top of the next row down
+            top += block_height + 2
+        
+        
     elif level == 3:
         fundo_nivel('atlantis2.png')
         FPS=100
@@ -521,19 +529,18 @@ def game_screen(screen,level, assets):
         clock.tick(FPS)
         
         if state == PLAYING:
-            hits = pygame.sprite.groupcollide(blocks, balls, True, False)
+            hits = pygame.sprite.groupcollide(balls, blocks, False, True)
             for hit in hits: # Pode haver mais de um
                 score+=100
-                ball.bounce(False)
-                
+                hit.bounce(False)
+
             # Processa os eventos (mouse, teclado, botão, etc).
             for event in pygame.event.get():
-                
+
                 # Verifica se foi fechado.
                 if event.type == pygame.QUIT:
                     state = DONE
-                    
-                
+
                 # Verifica se apertou alguma tecla.
                 if event.type == pygame.KEYDOWN:
                     # Dependendo da tecla, altera a velocidade.
@@ -542,17 +549,16 @@ def game_screen(screen,level, assets):
                     if event.key == pygame.K_RIGHT:
                         player.speedx = 8
                     if event.key == pygame.K_SPACE:
+                        print()
                         ball = Ball(player.rect.x)
 
                         all_sprites.add(ball)
                         balls.add(ball)
-                        
+
                        # pew_sound.play()
                     if event.key ==pygame.K_ESCAPE:
                         state = PAUSED
-            
 
-                        
                 # Verifica se soltou alguma tecla.
                 if event.type == pygame.KEYUP:
                     # Dependendo da tecla, altera a velocidade.
@@ -560,33 +566,28 @@ def game_screen(screen,level, assets):
                         player.speedx = 0
                     if event.key == pygame.K_RIGHT:
                         player.speedx = 0
-                        
-                
+
             # See if the ball hits the player paddle
             for ball in pygame.sprite.spritecollide(player, balls, False):
                 ball.bounce(False)
 
-         
-            # Check for collisions between the ball and the blocks
+                # Game ends if all the blocks are gone
+            if len(blocks) == 0 and level<=3:
+                    level+=1
+
             for ball in balls:
                 if ball.y > HEIGHT:
                     lives -= 1
                     ball.kill()
-                                                    
-            if len(blocks) == 0:
-                    if level<=5:
-                        level+=1
-                    else:
-                        state=DONE
 
-                                
-    
-     #-------------------               
-#                Verifica se houve colisão entre nave e meteoro
+            if lives <= 0:
+                state = DONE
+
+               # Verifica se houve colisão entre nave e meteoro
             hits = pygame.sprite.spritecollide(player, tiros, False, pygame.sprite.collide_circle)
             if hits:
                 # Toca o som da colisão
-                boom_sound.play()
+                # boom_sound.play()
                 player.kill()
                 lives -= 1
                 for ball in balls:
@@ -596,7 +597,7 @@ def game_screen(screen,level, assets):
                 state = EXPLODING
                 explosion_tick = pygame.time.get_ticks()
                 explosion_duration = explosao.frame_ticks * len(explosao.explosion_anim) + 400
-#            
+
         if state == EXPLODING:
             now = pygame.time.get_ticks()
             if now - explosion_tick > explosion_duration:
@@ -607,10 +608,6 @@ def game_screen(screen,level, assets):
                     player = Player(assets["player_img"])
                     all_sprites.add(player)
                     
-
-                
-     #----------------------
-        
      
         # Depois de processar os eventos.
         # Atualiza a acao de cada sprite.
