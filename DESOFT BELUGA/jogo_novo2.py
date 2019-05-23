@@ -453,6 +453,7 @@ def game_screen(screen,level, assets):
     balls = pygame.sprite.Group()
     pygame.mixer.music.load(path.join(snd_dir, 'HawaiiFive-O-ThemeSongFullVersion.mp3'))
     pygame.mixer.music.set_volume(0.4)
+    pygame.mixer.music.play(loops=-1)
     
     # Loop principal.
     score = 0
@@ -647,6 +648,7 @@ pygame.mixer.init()
 
 # Tamanho da tela.
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
 
 
 # Nome do jogo
