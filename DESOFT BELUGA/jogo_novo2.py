@@ -46,7 +46,7 @@ EXPLODING = 6
 DONE = 7
 PAUSED = 8
 
-LEVEL_CONFIG = {1:{"fundo":'norway.png','rows':6},2:{"fundo":'atlantis2.png','rows':3}}
+LEVEL_CONFIG = {1:{"fundo":'norway.png','rows':3},2:{"fundo":'underwater2.png','rows':4},3:{"fundo":'submarine.png','rows':5},4:{"fundo":'area_51_2.1.png','rows':6},5:{"fundo":'underwater2.png','rows':7}}
 
 
 level = 1
