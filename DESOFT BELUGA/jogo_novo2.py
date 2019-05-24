@@ -36,12 +36,12 @@ block_height = 25
 
 # Estados para controle do fluxo da aplicação
 INIT = 0
-GAME = 1
+PLAYING = 1
 QUIT = 2
 GAME_OVER = 3
 INTRODUCAO = 4
 
-PLAYING = 5
+#PLAYING = 5
 EXPLODING = 6
 DONE = 7
 PAUSED = 8
@@ -97,7 +97,7 @@ def introducao(screen):
                     i+=1
                     if i >= 6:
                         
-                        state = GAME
+                        state = PLAYING
                         running = False
                                 
         # A cada loop, redesenha o fundo e os sprites
@@ -704,7 +704,7 @@ try:
             state = init_screen(screen)
         if state == INTRODUCAO:
             state=introducao(screen)
-        elif state == GAME:
+        elif state == PLAYING:
             ret = game_screen(screen, assets,level,score)
             score=ret['score']
             level=ret['level']
