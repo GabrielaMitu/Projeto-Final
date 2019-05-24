@@ -41,6 +41,13 @@ QUIT = 2
 GAME_OVER = 3
 INTRODUCAO = 4
 
+PLAYING = 5
+EXPLODING = 6
+DONE = 7
+PAUSED = 8
+
+LEVEL_CONFIG = {1:{"fundo":'norway.png','rows':6},2:{"fundo":'atlantis2.png','rows':3}}
+
 
 level = 1
 
@@ -164,23 +171,34 @@ def game_over_screen(screen):
     background = pygame.image.load(path.join(img_dir, 'game_over.png')).convert()
     background_rect = background.get_rect()
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+    
+    pygame.mixer.music.load(path.join(snd_dir, 'MissionImpossibleTheme.ogg'))
+    pygame.mixer.music.set_volume(0.4)
+    pygame.mixer.music.play(loops=-1)
 
 
     running = True
+    i=1
+
     while running:      
         # Ajusta a velocidade do jogo.
-        clock.tick(FPS)       
+        clock.tick(FPS)  
         # Processa os eventos (mouse, teclado, botão, etc).
         for event in pygame.event.get():
             # Verifica se foi fechado.
             if event.type == pygame.QUIT:
                 state = QUIT
                 running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_n:
-                    state = GAME
-                    running = False
 
+            if event.type == pygame.KEYDOWN:
+                background = pygame.image.load(path.join(img_dir, 'GameOver-0{}.png'.format(i))).convert()
+                background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+                i+=1
+                if i >= 5:
+                        if event.key == pygame.K_n:
+                            state = GAME
+                            running = False
+                            
         # A cada loop, redesenha o fundo e os sprites
         screen.fill(BLACK)
         screen.blit(background, background_rect)
@@ -189,7 +207,9 @@ def game_over_screen(screen):
         pygame.display.flip()
         
         return state
-                        
+   
+    
+                   
 # Classe Jogador que representa a beluga
 class Player(pygame.sprite.Sprite):
     
@@ -434,9 +454,8 @@ def load_assets(img_dir, snd_dir, fnt_dir):
 
 
 
-def game_screen(screen, assets):
-    level=1 
-    
+def game_screen(screen, assets,level,score):
+    config=LEVEL_CONFIG[level]
     # Nome do jogo
     pygame.display.set_caption("BELUGA")
     
@@ -466,35 +485,31 @@ def game_screen(screen, assets):
     pygame.mixer.music.play(loops=-1)
     
     # Loop principal.
-    score = 0
     lives = 99
 
     #Estados do jogo
-    PLAYING = 0
-    EXPLODING = 1
-    DONE = 2
-    PAUSED = 3
+   
    
     
-    if level == 1:
-        background = fundo_nivel('norway.png')
-        FPS = 60
-        #create_blocks(4,'submarine-prata.png', tiros, blocks, all_sprites)
-         # The top of the block (y position)
-        top = 80
+    
+    background = fundo_nivel(config['fundo'])
+    FPS = 60
+    #create_blocks(4,'submarine-prata.png', tiros, blocks, all_sprites)
+     # The top of the block (y position)
+    top = 80
 
-        font = pygame.font.Font(None, 36)
+    font = pygame.font.Font(None, 36)
+    
+    for row in range(config['rows']):
+        # 32 columns of blocks
+        for column in range(0, 14):
+            # Create a block (color,x,y)
+            block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
+            blocks.add(block)
+            all_sprites.add(block)
+        # Move the top of the next row down
+        top += block_height + 2
         
-        for row in range(5):
-            # 32 columns of blocks
-            for column in range(0, 14):
-                # Create a block (color,x,y)
-                block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
-                blocks.add(block)
-                all_sprites.add(block)
-            # Move the top of the next row down
-            top += block_height + 2
-            
             
             
 #            
@@ -528,10 +543,9 @@ def game_screen(screen, assets):
 
 
          
-        
+    level_done=False    
     state = PLAYING
-    level=1
-    while state != DONE:
+    while state != QUIT and not level_done:
         
         # Ajusta a velocidade do jogo.
 #        clock.tick(FPS)
@@ -540,23 +554,7 @@ def game_screen(screen, assets):
             FPS=60
             clock.tick(FPS)
 
-            
-                    
-            if level == 2:
-                background=fundo_nivel('underwater2.png')
-             #   create_blocks(8,'submarine.png', tiros)
-                top=80
-                for row in range(6):
-                    # 32 columns of blocks
-                    for column in range(0, 14):
-                        # Create a block (color,x,y)
-                        block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
-                        blocks.add(block)
-                        all_sprites.add(block)
-                    # Move the top of the next row down
-                    top += block_height + 2
-                    
-                    
+
 
             font = pygame.font.Font(None, 36)
             hits = pygame.sprite.groupcollide(balls, blocks, False, True)
@@ -569,7 +567,7 @@ def game_screen(screen, assets):
 
                 # Verifica se foi fechado.
                 if event.type == pygame.QUIT:
-                    state = DONE
+                    state = QUIT
 
                 # Verifica se apertou alguma tecla.
                 if event.type == pygame.KEYDOWN:
@@ -605,6 +603,7 @@ def game_screen(screen, assets):
             if len(blocks) == 0 and level<=5:
                     level_up(screen)
                     level+=1
+                    level_done=True
                         
    
 
@@ -677,8 +676,8 @@ def game_screen(screen, assets):
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
             
-            
-    return QUIT 
+    ret ={'state':state,'level':level,'score':score}        
+    return ret 
 
 
 # Inicialização do Pygame.
@@ -695,6 +694,8 @@ pygame.display.set_caption("FBI")
 # Carrega todos os assets uma vez só e guarda em um dicionário
 assets = load_assets(img_dir, snd_dir, fnt_dir)
 
+score=0
+level=1
 # Comando para evitar travamentos.
 try:
     state = INIT
@@ -704,8 +705,11 @@ try:
         if state == INTRODUCAO:
             state=introducao(screen)
         elif state == GAME:
-            state = game_screen(screen, assets)
-        elif state == GAME_OVER:
+            ret = game_screen(screen, assets,level,score)
+            score=ret['score']
+            level=ret['level']
+            state=ret['state']
+        elif state == GAME_OVER: #DONE
             state= game_over_screen(screen)
         else:
             state = QUIT
