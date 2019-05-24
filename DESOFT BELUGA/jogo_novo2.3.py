@@ -48,13 +48,6 @@ def draw_text_middle(text, size, color, surface):
     label = score_font.render(text, 1, color)
 
     surface.blit(label, (WIDTH/2 - (label.get_width() / 2), HEIGHT/2 - label.get_height()/2))
-    
-    
-def level_up(screen):
-     now = pygame.time.get_ticks()
-     if now <1000:
-                draw_text_middle("Level up!",60, WHITE, screen)
-    
 
 def introducao(screen):
     # Variável para o ajuste de velocidade
@@ -64,9 +57,6 @@ def introducao(screen):
     background = pygame.image.load(path.join(img_dir, 'intro-02.png')).convert()
     background_rect = background.get_rect()
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    pygame.mixer.music.load(path.join(snd_dir, 'MissionImpossibleTheme.ogg'))
-    pygame.mixer.music.set_volume(0.4)
-    pygame.mixer.music.play(loops=-1)
 
    
     running = True
@@ -602,11 +592,12 @@ def game_screen(screen, assets):
                 ball.bounce(False)
 
                 # Game ends if all the blocks are gone
-            if len(blocks) == 0 and level<=5:
-                    level_up(screen)
+            if len(blocks) == 0 and level<=3:
                     level+=1
-                        
-   
+                    for block in blocks:
+                        block.kill()
+                    for tiro in tiros:
+                        tiro.kill()
 
             for ball in balls:
                 if ball.y > HEIGHT:

@@ -42,18 +42,18 @@ GAME_OVER = 3
 INTRODUCAO = 4
 
 
-level = 1
-
 def draw_text_middle(text, size, color, surface):
     label = score_font.render(text, 1, color)
 
     surface.blit(label, (WIDTH/2 - (label.get_width() / 2), HEIGHT/2 - label.get_height()/2))
     
-    
 def level_up(screen):
      now = pygame.time.get_ticks()
      if now <1000:
                 draw_text_middle("Level up!",60, WHITE, screen)
+    
+    
+    
     
 
 def introducao(screen):
@@ -64,9 +64,6 @@ def introducao(screen):
     background = pygame.image.load(path.join(img_dir, 'intro-02.png')).convert()
     background_rect = background.get_rect()
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    pygame.mixer.music.load(path.join(snd_dir, 'MissionImpossibleTheme.ogg'))
-    pygame.mixer.music.set_volume(0.4)
-    pygame.mixer.music.play(loops=-1)
 
    
     running = True
@@ -334,29 +331,29 @@ class Ball(pygame.sprite.Sprite):
         self.x += self.xspeed
         self.y -= self.yspeed
 
-        # Move the image to where our x and y are
+        # mover a imagem
+
         self.rect.x = self.x
         self.rect.y = self.y
 
-        # Do we bounce off the top of the screen?
+        # a bola bate no topo?
         if self.y <= 0:
             self.bounce(False)
 
-        # Do we bounce off the left of the screen?
+         # a bola bate na esquerda da tela?
         if self.x <= 0:
             self.bounce(True)
 
-        # Do we bounce of the right side of the screen?
+         # a bola bate na direita da tela?
         if self.x > self.screenwidth-self.width:
             self.bounce(True)
 
-        # Did we fall off the bottom edge of the screen?
+        # D # a bola bate no fundo da tela?
         if self.y > 600:
             return True
         else:
             return False
 
-        
         
         
 class Explosion(pygame.sprite.Sprite):
@@ -434,8 +431,8 @@ def load_assets(img_dir, snd_dir, fnt_dir):
 
 
 
-def game_screen(screen, assets):
-    level=1 
+def game_screen(screen,level, assets):
+    
     
     # Nome do jogo
     pygame.display.set_caption("BELUGA")
@@ -449,21 +446,20 @@ def game_screen(screen, assets):
     boom_sound = assets["boom_sound"]
     
     
-    # Cria uma nave. O construtor será chamado automaticamente.
+    # Cria a beluga. O construtor será chamado automaticamente.
     player = Player(assets["player_img"])
     
     # Carrega a fonte para desenhar o score.
     score_font = assets["score_font"]
     
-    # Cria um grupo de todos os sprites e adiciona a nave.
+    # Cria um grupo de todos os sprites e adiciona a beluga
     all_sprites = pygame.sprite.Group()
     all_sprites.add(player)
     blocks = pygame.sprite.Group()
     tiros=pygame.sprite.Group()
     balls = pygame.sprite.Group()
-    pygame.mixer.music.load(path.join(snd_dir, 'HawaiiFive-O-ThemeSongFullVersion.mp3'))
-    pygame.mixer.music.set_volume(0.4)
-    pygame.mixer.music.play(loops=-1)
+   # pygame.mixer.music.load(path.join(snd_dir, 'HawaiiFive-O-ThemeSongFullVersion.mp3'))
+    # pygame.mixer.music.set_volume(0.4)
     
     # Loop principal.
     score = 0
@@ -479,13 +475,40 @@ def game_screen(screen, assets):
     if level == 1:
         background = fundo_nivel('norway.png')
         FPS = 60
-        #create_blocks(4,'submarine-prata.png', tiros, blocks, all_sprites)
+        top = 80
+        blockcount = 32
+             
+        font = pygame.font.Font(None, 36)
+ 
+        for row in range(8):
+            for column in range(0, 19):
+       
+                    create_blocks(4,'submarine-prata.png', tiros, blocks, all_sprites)
          # The top of the block (y position)
         top = 80
 
         font = pygame.font.Font(None, 36)
         
+        # --- Create blocks
+         
+        # Five rows of blocks
         for row in range(5):
+            # 32 columns of blocks
+            for column in range(0, 14):
+                # Create a block (color,x,y)
+                block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
+                blocks.add(block)
+                all_sprites.add(block)
+            top += block_height + 2
+            
+            
+            
+            
+    elif level == 2:
+        background=fundo_nivel('underwater2.png')
+        create_blocks(8,'submarine.png', tiros)
+        top=80
+        for row in range(6):
             # 32 columns of blocks
             for column in range(0, 14):
                 # Create a block (color,x,y)
@@ -494,37 +517,20 @@ def game_screen(screen, assets):
                 all_sprites.add(block)
             # Move the top of the next row down
             top += block_height + 2
-            
-            
-            
-#            
-#    elif level == 2:
-#        background=fundo_nivel('underwater2.png')
-#     #   create_blocks(8,'submarine.png', tiros)
-#        top=80
-#        for row in range(6):
-#            # 32 columns of blocks
-#            for column in range(0, 14):
-#                # Create a block (color,x,y)
-#                block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
-#                blocks.add(block)
-#                all_sprites.add(block)
-#            # Move the top of the next row down
-#            top += block_height + 2
-#        
         
-#    elif level == 3:
-#        fundo_nivel('atlantis2.png')
-#        FPS=100
-#        create_blocks(6,'submarine.png', tiros)
-#    elif level == 4:
-#        fundo_nivel('area_51_2.1.png')
-#        create_blocks(7,'submarine-azul.png')
-#        FPS=125
-#    elif level == 5:
-#        fundo_nivel('atlantis2.png')
-#        FPS=150
-#        create_blocks(8,'submarine-verde.png')
+        
+    elif level == 3:
+        fundo_nivel('atlantis2.png')
+        FPS=100
+        create_blocks(6,'submarine.png', tiros)
+    elif level == 4:
+        fundo_nivel('area_51_2.1.png')
+        create_blocks(7,'submarine-azul.png')
+        FPS=125
+    elif level == 5:
+        fundo_nivel('atlantis2.png')
+        FPS=150
+        create_blocks(8,'submarine-verde.png')
 
 
          
@@ -534,31 +540,9 @@ def game_screen(screen, assets):
     while state != DONE:
         
         # Ajusta a velocidade do jogo.
-#        clock.tick(FPS)
+        clock.tick(FPS)
         
         if state == PLAYING:
-            FPS=60
-            clock.tick(FPS)
-
-            
-                    
-            if level == 2:
-                background=fundo_nivel('underwater2.png')
-             #   create_blocks(8,'submarine.png', tiros)
-                top=80
-                for row in range(6):
-                    # 32 columns of blocks
-                    for column in range(0, 14):
-                        # Create a block (color,x,y)
-                        block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
-                        blocks.add(block)
-                        all_sprites.add(block)
-                    # Move the top of the next row down
-                    top += block_height + 2
-                    
-                    
-
-            font = pygame.font.Font(None, 36)
             hits = pygame.sprite.groupcollide(balls, blocks, False, True)
             for hit in hits: # Pode haver mais de um
                 score+=100
@@ -596,32 +580,34 @@ def game_screen(screen, assets):
                         player.speedx = 0
                     if event.key == pygame.K_RIGHT:
                         player.speedx = 0
+                        
+                
+            # checa a colisão da bola com a beluga
+            for ball in pygame.sprite.spritecollide(player, balls, False):
+                ball.bounce(False)
+
+         
+            # checa a colisão entre a bola e os submarinos
 
             # See if the ball hits the player paddle
             for ball in pygame.sprite.spritecollide(player, balls, False):
                 ball.bounce(False)
 
                 # Game ends if all the blocks are gone
-            if len(blocks) == 0 and level<=5:
-                    level_up(screen)
-                    level+=1
-                        
-   
+#            if len(blocks) == 0 and level<=3:
+#                    level+=1
+            if len(blocks) == 0:
+                state=DONE  
 
             for ball in balls:
                 if ball.y > HEIGHT:
                     lives -= 1
                     ball.kill()
+                                                    
+               # Verifica se houve colisão entre a beluga e os tiros
 
             if lives <= 0:
                 state = DONE
-                
-            
-                    
-            
-            
-            
-           
 
                # Verifica se houve colisão entre nave e meteoro
             hits = pygame.sprite.spritecollide(player, tiros, False, pygame.sprite.collide_circle)
@@ -645,12 +631,20 @@ def game_screen(screen, assets):
                     state = DONE
                 else:
                     state = PLAYING
-                    player = Player(assets["player_img"])
+                     player = Player(assets["player_img"])
                     all_sprites.add(player)
                     
+        # sobe de nível quando consegue destruir todos os submarinos
+        if len(blocks) == 0:
+            if level <= 5:
+                level_up(screen)
+                level +=1
+            else:
+                state = DONE
+                  
      
         # Depois de processar os eventos.
-        # Atualiza a acao de cada sprite.
+        # Atualiza a ação de cada sprite.
         all_sprites.update()
         tiros.update()
         
@@ -689,7 +683,6 @@ pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 
-
 # Nome do jogo
 pygame.display.set_caption("FBI")
 # Carrega todos os assets uma vez só e guarda em um dicionário
@@ -704,8 +697,8 @@ try:
         if state == INTRODUCAO:
             state=introducao(screen)
         elif state == GAME:
-            state = game_screen(screen, assets)
-        elif state == GAME_OVER:
+            state = game_screen(screen,level, assets)
+        elif state == DONE:
             state= game_over_screen(screen)
         else:
             state = QUIT

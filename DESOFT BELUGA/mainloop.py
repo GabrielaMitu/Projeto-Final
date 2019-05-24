@@ -1,15 +1,6 @@
-import random
-from os import path, environ
 import pygame
-import math
-from pygame.locals import *
-import time
-import pygameMenu
-
-# Estabelece a pasta que contem as figuras e sons.
-img_dir = path.join(path.dirname(__file__), 'img')
-snd_dir = path.join(path.dirname(__file__), 'snd')
-fnt_dir = path.join(path.dirname(__file__), 'font')
+import os
+import random
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -18,42 +9,11 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0    , 255)
 YELLOW = (255, 255, 0)
 
-# Dados gerais do jogo.
-WIDTH = 800 # Largura da tela
-HEIGHT = 600 # Altura da tela
-FPS = 60 # Frames por segundo
-
-
-def load_assets(img_dir, snd_dir, fnt_dir):
-    assets = {}
-    assets["background_img"] = pygame.image.load(path.join(img_dir, 'background.png')).convert()
-    assets["player_img"] = pygame.image.load(path.join(img_dir, "player.png")).convert()
-    assets["tiros_img"] = pygame.image.load(path.join(img_dir, 'Red_laser.png')).convert()
-    assets["submarine_img"] = pygame.image.load(path.join(img_dir, "submarine.png")).convert()
-    assets["score_font"] = pygame.font.Font(path.join(fnt_dir, "PressStart2P.ttf"), 28)
-    assets["boom_sound"] = pygame.mixer.Sound(path.join(snd_dir, 'expl3.wav'))
-
-    explosion_anim = []
-    for i in range(9):
-        filename = 'regularExplosion0{}.png'.format(i)
-        img = pygame.image.load(path.join(img_dir, filename)).convert()
-        img = pygame.transform.scale(img, (32, 32))        
-        img.set_colorkey(BLACK)
-        explosion_anim.append(img)
-    assets["explosion_anim"] = explosion_anim
-    assets["score_font"] = pygame.font.Font(path.join(fnt_dir, "PressStart2P.ttf"), 28)
-    return assets
-
-
-
-
 class Player(pygame.sprite.Sprite):
     # Construtor da classe.
     def __init__(self, player_img, max_vel, screenDimensions):
         pygame.sprite.Sprite.__init__(self)
-        self.image = player_img#pygame.image.load(path.join(img_dir, 'player.png')).convert()
-        self.image = pygame.transform.scale(self.image,(70, 70))
-        self.image = pygame.transform.scale(player_img, (70, 70))
+        self.image = pygame.image.load(player_img).convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.centerx = screenDimensions[0]/2
         self.rect.bottom = screenDimensions[1] -50
@@ -81,7 +41,7 @@ class Player(pygame.sprite.Sprite):
         key = pygame.key.get_pressed()
         if key[pygame.K_w] and self.n_balls < 1:
             self.n_balls += 1
-            ball = Ball(img="player.png", vel=10, angle=45, startPosition=self.rect.center)
+            ball = Ball(img="golden_apple.png", vel=10, angle=45, startPosition=self.rect.center)
             return ball
         return None
 
@@ -92,7 +52,7 @@ class Submarine(pygame.sprite.Sprite):
     # Construtor da classe.
     def __init__(self, img, startPosition, xspeed):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(path.join(img_dir, 'submarine.png')).convert()
+        self.image = pygame.image.load(img).convert_alpha()
         self.image = pygame.transform.scale(self.image, (45, 30))
         self.rect = self.image.get_rect()
         self.rect.centerx = startPosition[0]
@@ -145,7 +105,7 @@ class Shoot(pygame.sprite.Sprite):
     # Construtor da classe.
     def __init__(self, img, startPosition, yspeed):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(path.join(img_dir, 'Red_laser.png')).convert()
+        self.image = pygame.image.load(img).convert_alpha()
         self.image = pygame.transform.scale(self.image, (10, 10))
         self.rect = self.image.get_rect()
         self.rect.center = startPosition
@@ -154,15 +114,12 @@ class Shoot(pygame.sprite.Sprite):
     def move(self):
         self.rect.y += self.yspeed
 
+
 pygame.init()
-screen = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption("Jogo Beluga")
-#environ['SDL_VIDEO_CENTERED'] = '1'
+os.environ['SDL_VIDEO_CENTERED'] = '1'
 
 clock = pygame.time.Clock()
-
-background = pygame.image.load(path.join(img_dir, 'background.png')).convert()
-background_rect = background.get_rect()
 
 
 red = [255,0,0]
@@ -177,12 +134,12 @@ display_specs = pygame.display.Info()
 #game sets
 width_screen = display_specs.current_w
 height_screen = display_specs.current_h + 23
-
+screen = pygame.display.set_mode((width_screen,height_screen))
 FPS = 100
 
 lifes = 3
 
-player = Player('player.png', max_vel=15, screenDimensions=(width_screen, height_screen))
+player = Player('apple.png', max_vel=15, screenDimensions=(width_screen, height_screen))
 player_group = pygame.sprite.Group()
 player_group.add(player)
 
