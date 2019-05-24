@@ -48,46 +48,58 @@ def load_assets(img_dir, snd_dir, fnt_dir):
 
 
 class Player(pygame.sprite.Sprite):
+    
     # Construtor da classe.
-    def __init__(self, player_img, max_vel, screenDimensions):
+    def __init__(self, player_img):
+        
+        # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
-        self.image = player_img#pygame.image.load(path.join(img_dir, 'player.png')).convert()
-        self.image = pygame.transform.scale(self.image,(70, 70))
-        self.image = pygame.transform.scale(player_img, (70, 70))
+        
+        # Carregando a imagem de fundo.
+        self.image = pygame.image.load(path.join(img_dir, "player.png")).convert()
+        
+        # Diminuindo o tamanho da imagem.
+
+        self.image = pygame.transform.scale(self.image, (70, 70))
+        
+        # Deixando transparente.
+        self.image.set_colorkey(BLACK)
+        
+        # Detalhes sobre o posicionamento.
         self.rect = self.image.get_rect()
-        self.rect.centerx = screenDimensions[0]/2
-        self.rect.bottom = screenDimensions[1] -50
-        self.max_vel = max_vel
-        self.screenX = screenDimensions[0]
-        self.n_balls = 0
-
+        
+        # Centraliza embaixo da tela.
+        self.rect.centerx = WIDTH / 2
+        self.rect.bottom = HEIGHT - 10
+        
+        # Velocidade da nave
+        self.speedx = 0
+        
+        # Melhora a colisão estabelecendo um raio de um circulo
+        self.radius = 70
+    
     def move(self):
-        key = pygame.key.get_pressed()
-        self.xspeed = 0
-        if self.rect.left >= 0:
-            if key[pygame.K_d]:
-                self.xspeed = self.max_vel
-        else:
-            self.rect.left = 1
-        if self.rect.right <= self.screenX:
-            if key[pygame.K_a]:
-                self.xspeed = -self.max_vel
-        else:
-            self.rect.left = self.screenX-28
-
-        self.rect.x += self.xspeed
-
-    def shoot(self):
-        key = pygame.key.get_pressed()
-        if key[pygame.K_w] and self.n_balls < 1:
-            self.n_balls += 1
-            ball = Ball(img="player.png", vel=10, angle=45, startPosition=self.rect.center)
-            return ball
-        return None
-
+        self.rect.x += self.speedx
+        
+        # Mantem dentro da tela
+        if self.rect.right > WIDTH:
+            self.rect.right = WIDTH
+        if self.rect.left < 0:
+            self.rect.left = 0
+            
+            
+#    def shoot(self):
+#        key = pygame.key.get_pressed()
+#        if key[pygame.K_SPACE] and self.n_balls < 1:
+#            self.n_balls += 1
+#            ball = Ball(img="player.png", vel=10, angle=45, startPosition=self.rect.center)
+#            return ball
+#        return None
     def update(self):
         self.move()
 
+            
+            
 class Submarine(pygame.sprite.Sprite):
     # Construtor da classe.
     def __init__(self, img, startPosition, xspeed):
@@ -98,6 +110,7 @@ class Submarine(pygame.sprite.Sprite):
         self.rect.centerx = startPosition[0]
         self.rect.bottom = startPosition[1]
         self.xspeed = xspeed
+        self.image.set_colorkey(BLACK)
 
     def shoot(self):
         chance = random.randint(0,1000)
@@ -115,18 +128,41 @@ class Submarine(pygame.sprite.Sprite):
 
 
 class Ball(pygame.sprite.Sprite):
-    # Construtor da classe.
-    def __init__(self, img, vel, angle, startPosition):
+    # Constructor. Pass in the color of the block, and its x and y position
+    def __init__(self, x):
+        # Call the parent class (Sprite) constructor
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(img).convert_alpha()
-        self.rect = self.image.get_rect()
-        self.rect.centerx = startPosition[0]
-        self.rect.bottom = startPosition[1] -20
-        self.vel = vel
-        self.angle = angle
-        self.xspeed = vel*math.cos(angle)
-        self.yspeed = vel*math.sin(angle)
 
+        # Speed in pixels per cycle
+        self.speed = 10.0
+
+        # Floating point representation of where the ball is
+        self.x = x
+        self.y = 500
+
+        # Direction of ball (in degrees)
+        # self.direction = 45
+
+        self.width=10
+        self.height=10
+
+        # Create the image of the ball
+        self.image = pygame.Surface([self.width, self.height])
+
+        # Color the ball
+        self.image.fill(WHITE)
+
+        # Get a rectangle object that shows where our image is
+        self.rect = self.image.get_rect()
+
+        self.xspeed = math.sqrt(50)
+        self.yspeed = math.sqrt(50)
+
+        # Get attributes for the height/width of the screen
+        self.screenheight = pygame.display.get_surface().get_height()
+        self.screenwidth = pygame.display.get_surface().get_width()
+
+    # This function will bounce the ball off a horizontal surface (not a vertical one)
     def move(self):
         self.rect.x += self.xspeed
         self.rect.y -= self.yspeed
@@ -141,6 +177,7 @@ class Ball(pygame.sprite.Sprite):
         self.move()
 
 
+
 class Shoot(pygame.sprite.Sprite):
     # Construtor da classe.
     def __init__(self, img, startPosition, yspeed):
@@ -150,19 +187,75 @@ class Shoot(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = startPosition
         self.yspeed = yspeed
+        self.image.set_colorkey(BLACK)
+
 
     def move(self):
         self.rect.y += self.yspeed
+        
+class Explosion(pygame.sprite.Sprite):
+
+    # Construtor da classe.
+    def __init__(self, center, explosion_anim):
+        # Construtor da classe pai (Sprite).
+        pygame.sprite.Sprite.__init__(self)
+
+        # Carrega a animação de explosão
+        self.explosion_anim = explosion_anim
+
+        # Inicia o processo de animação colocando a primeira imagem na tela.
+        self.frame = 0
+        self.image = self.explosion_anim[self.frame]
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+
+        # Guarda o tick da primeira imagem
+        self.last_update = pygame.time.get_ticks()
+
+        # Controle de ticks de animação: troca de imagem a cada self.frame_ticks milissegundos.
+        self.frame_ticks = 50
+
+    def update(self):
+        # Verifica o tick atual.
+        now = pygame.time.get_ticks()
+
+        # Verifica quantos ticks se passaram desde a ultima mudança de frame.
+        elapsed_ticks = now - self.last_update
+
+        # Se já está na hora de mudar de imagem...
+        if elapsed_ticks > self.frame_ticks:
+
+            # Marca o tick da nova imagem.
+            self.last_update = now
+
+            # Avança um quadro.
+            self.frame += 1
+
+            # Verifica se já chegou no final da animação.
+            if self.frame == len(self.explosion_anim):
+                # Se sim, tchau explosão!
+                self.kill()
+            else:
+                # Se ainda não chegou ao fim da explosão, troca de imagem.
+                center = self.rect.center
+                self.image = self.explosion_anim[self.frame]
+                self.rect = self.image.get_rect()
+                self.rect.center = center
+ 
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption("Jogo Beluga")
 #environ['SDL_VIDEO_CENTERED'] = '1'
 
+assets = load_assets(img_dir, snd_dir, fnt_dir)
+
+
 clock = pygame.time.Clock()
 
 background = pygame.image.load(path.join(img_dir, 'background.png')).convert()
 background_rect = background.get_rect()
+background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
 
 red = [255,0,0]
@@ -182,7 +275,7 @@ FPS = 100
 
 lifes = 3
 
-player = Player('player.png', max_vel=15, screenDimensions=(width_screen, height_screen))
+player = Player('player.png')
 player_group = pygame.sprite.Group()
 player_group.add(player)
 
@@ -196,6 +289,7 @@ for a in range(5):
 
 balls_group = pygame.sprite.Group()
 shoot_group = pygame.sprite.Group()
+explosion_group=pygame.sprite.Group()
 
 while lifes > 0:
     clock.tick(FPS)
@@ -206,6 +300,29 @@ while lifes > 0:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 lifes = 0
+                
+        if event.type == pygame.KEYDOWN:
+                    # Dependendo da tecla, altera a velocidade.
+                    if event.key == pygame.K_LEFT:
+                        player.speedx = -8
+                    if event.key == pygame.K_RIGHT:
+                        player.speedx = 8
+                    if event.key == pygame.K_SPACE:
+                        print()
+                        ball = Ball(player.rect.x)
+
+                        balls_group.add(ball)
+                       # balls.add(ball)
+                        
+                       
+                
+        # Verifica se soltou alguma tecla.
+        if event.type == pygame.KEYUP:
+            # Dependendo da tecla, altera a velocidade.
+            if event.key == pygame.K_LEFT:
+                player.speedx = 0
+            if event.key == pygame.K_RIGHT:
+                player.speedx = 0
 
     for sub in subs_group:
         if sub.rect.right >= width_screen or sub.rect.left <= 0:
@@ -221,6 +338,20 @@ while lifes > 0:
     colisions = pygame.sprite.spritecollide(player, shoot_group, True)
     for colision in colisions:
         lifes -= 1
+        # Toca o som da colisão
+        # boom_sound.play()
+        player.kill()
+        for ball in balls_group:
+            ball.kill()
+        explosao = Explosion(player.rect.center, assets["explosion_anim"])
+        explosion_group.add(explosao)
+        explosion=True
+        explosion_tick = pygame.time.get_ticks()
+        explosion_duration = explosao.frame_ticks * len(explosao.explosion_anim) + 400
+        while explosion:
+            now = pygame.time.get_ticks()
+            
+            
 
     for ball in balls_group:
         colisions = pygame.sprite.spritecollide(ball, player_group, False)
@@ -232,9 +363,9 @@ while lifes > 0:
         for colision in colisions:
             ball.vertical_bounce()
 
-    ball = player.shoot()
-    if ball != None:
-        balls_group.add(ball)
+#    ball = Ball
+#    if ball != None:
+#        balls_group.add(ball)
 
     for ball in balls_group:
         ball.update()
@@ -246,11 +377,16 @@ while lifes > 0:
             lifes -= 1
             player.n_balls -= 1
             ball.kill()
+            
+            
 
     player.update()
-    screen.fill(black)
+    background_rect=background.get_rect()
+    screen.fill(BLACK)
+    screen.blit(background, background_rect)    
     subs_group.draw(screen)
     shoot_group.draw(screen)
     player_group.draw(screen)
+    balls_group.draw(screen)
     balls_group.draw(screen)
     pygame.display.update()

@@ -46,7 +46,15 @@ EXPLODING = 6
 DONE = 7
 PAUSED = 8
 
-LEVEL_CONFIG = {1:{"fundo":'norway.png','rows':3,'FPS':60},2:{"fundo":'underwater2.png','rows':4,'FPS':400}}#,3:{"fundo":'submarine.png','rows':5},4:{"fundo":'area_51_2.1.png','rows':6},5:{"fundo":'underwater2.png','rows':7}}
+LEVEL_CONFIG = {
+        1:{"fundo":'norway.png','rows':3,'FPS':60},
+        2:{"fundo":'underwater2.png','rows':4,'FPS':400},
+        3:{"fundo":'submarine.png','rows':5},
+        4:{"fundo":'area_51_2.1.png','rows':6},
+        5:{"fundo":'underwater2.png','rows':7}
+        }
+
+GAME_SPEED=1
 
 
 level=1
@@ -120,17 +128,17 @@ def fundo_nivel(imagem):
         
 
 
-# 
-def create_blocks(numero_blocos,inimigo, tiros, blocks, all_sprites):
-        top = 80 
-        imagem_inimigo= pygame.image.load(path.join(img_dir, inimigo)).convert()
-        blockcount=10
-        for row in range(5):
-                for column in range(0, blockcount):
-                    block=Block(column*(block_width+20)+1,top, (imagem_inimigo,tiros)) 
-                    blocks.add(block)
-                    all_sprites.add(block)
-                top += block_height + 2
+## 
+#def create_blocks(numero_blocos,inimigo, tiros, blocks, all_sprites):
+#        top = 80 
+#        imagem_inimigo= pygame.image.load(path.join(img_dir, inimigo)).convert()
+#        blockcount=10
+#        for row in range(5):
+#                for column in range(0, blockcount):
+#                    block=Block(column*(block_width+20)+1,top, (imagem_inimigo,tiros)) 
+#                    blocks.add(block)
+#                    all_sprites.add(block)
+#                top += block_height + 2
 
 def init_screen(screen):
     # Variável para o ajuste de velocidade
@@ -168,7 +176,7 @@ def game_over_screen(screen):
     
     clock = pygame.time.Clock()
 
-    background = pygame.image.load(path.join(img_dir, 'game_over.png')).convert()
+    background = pygame.image.load(path.join(img_dir, 'GameOver-01.png')).convert()
     background_rect = background.get_rect()
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
     
@@ -178,7 +186,7 @@ def game_over_screen(screen):
 
 
     running = True
-    i=1
+    i=2
 
     while running:      
         # Ajusta a velocidade do jogo.
@@ -191,22 +199,27 @@ def game_over_screen(screen):
                 running = False
 
             if event.type == pygame.KEYDOWN:
-                background = pygame.image.load(path.join(img_dir, 'GameOver-0{}.png'.format(i))).convert()
-                background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-                i+=1
-                if i >= 5:
+                if i > 5:
                         if event.key == pygame.K_n:
-                            state = GAME
-                            running = False
+                            state = PLAYING
+                        else:
+                            state=QUIT
+                        running = False
+                else:
+                    background = pygame.image.load(path.join(img_dir, 'GameOver-0{}.png'.format(i))).convert()
+                    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+                    i+=1
+                
+                       
                             
         # A cada loop, redesenha o fundo e os sprites
-        screen.fill(BLACK)
-        screen.blit(background, background_rect)
-
-        # Depois de desenhar tudo, inverte o display.
-        pygame.display.flip()
+            screen.fill(BLACK)
+            screen.blit(background, background_rect)
+    
+            # Depois de desenhar tudo, inverte o display.
+            pygame.display.flip()
         
-        return state
+    return state
    
     
                    
@@ -244,7 +257,7 @@ class Player(pygame.sprite.Sprite):
     
     # Metodo que atualiza a posição da beluga
     def update(self):
-        self.rect.x += self.speedx
+        self.rect.x += self.speedx*GAME_SPEED
         
         # Mantem dentro da tela
         if self.rect.right > WIDTH:
@@ -311,7 +324,7 @@ class Ball(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
 
         # Speed in pixels per cycle
-        self.speed = 10.0
+        self.speed = 10.0*GAME_SPEED
 
         # Floating point representation of where the ball is
         self.x = x
@@ -455,6 +468,8 @@ def load_assets(img_dir, snd_dir, fnt_dir):
 
 
 def game_screen(screen, assets,level,score,FPS ) :
+    global GAME_SPEED
+    
     config=LEVEL_CONFIG[level]
     # Nome do jogo
     pygame.display.set_caption("BELUGA")
@@ -575,7 +590,6 @@ def game_screen(screen, assets,level,score,FPS ) :
                     if event.key == pygame.K_RIGHT:
                         player.speedx = 8
                     if event.key == pygame.K_SPACE:
-                        print()
                         ball = Ball(player.rect.x)
 
                         all_sprites.add(ball)
@@ -599,12 +613,13 @@ def game_screen(screen, assets,level,score,FPS ) :
 
                 # Game ends if all the blocks are gone
             if len(blocks) == 0:
-                if level<=5:
+                if level<len(LEVEL_CONFIG):
                     level_up(screen)
                     level+=1
-                    level_done=True
+                    GAME_SPEED+=0.25
                 else:
                     state = DONE
+                level_done=True
                         
    
 
@@ -615,6 +630,7 @@ def game_screen(screen, assets,level,score,FPS ) :
 
             if lives <= 0:
                 state = DONE
+                level_done=True
                 
             
                # Verifica se houve colisão entre nave e meteoro
@@ -670,7 +686,6 @@ def game_screen(screen, assets,level,score,FPS ) :
         
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
-            
     ret ={'state':state,'level':level,'score':score,'FPS':FPS}        
     return ret 
 
