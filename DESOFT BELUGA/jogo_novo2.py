@@ -46,10 +46,10 @@ EXPLODING = 6
 DONE = 7
 PAUSED = 8
 
-LEVEL_CONFIG = {1:{"fundo":'norway.png','rows':3},2:{"fundo":'underwater2.png','rows':4},3:{"fundo":'submarine.png','rows':5},4:{"fundo":'area_51_2.1.png','rows':6},5:{"fundo":'underwater2.png','rows':7}}
+LEVEL_CONFIG = {1:{"fundo":'norway.png','rows':3,'FPS':60},2:{"fundo":'underwater2.png','rows':4,'FPS':400}}#,3:{"fundo":'submarine.png','rows':5},4:{"fundo":'area_51_2.1.png','rows':6},5:{"fundo":'underwater2.png','rows':7}}
 
 
-level = 1
+level=1
 
 def draw_text_middle(text, size, color, surface):
     label = score_font.render(text, 1, color)
@@ -71,7 +71,7 @@ def introducao(screen):
     background = pygame.image.load(path.join(img_dir, 'intro-02.png')).convert()
     background_rect = background.get_rect()
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    pygame.mixer.music.load(path.join(snd_dir, 'MissionImpossibleTheme.ogg'))
+    pygame.mixer.music.load(path.join(snd_dir, 'MissionImpossibleTheme.mp3'))
     pygame.mixer.music.set_volume(0.4)
     pygame.mixer.music.play(loops=-1)
 
@@ -454,7 +454,7 @@ def load_assets(img_dir, snd_dir, fnt_dir):
 
 
 
-def game_screen(screen, assets,level,score):
+def game_screen(screen, assets,level,score,FPS ) :
     config=LEVEL_CONFIG[level]
     # Nome do jogo
     pygame.display.set_caption("BELUGA")
@@ -480,9 +480,7 @@ def game_screen(screen, assets,level,score):
     blocks = pygame.sprite.Group()
     tiros=pygame.sprite.Group()
     balls = pygame.sprite.Group()
-    pygame.mixer.music.load(path.join(snd_dir, 'HawaiiFive-O-ThemeSongFullVersion.mp3'))
-    pygame.mixer.music.set_volume(0.4)
-    pygame.mixer.music.play(loops=-1)
+    
     
     # Loop principal.
     lives = 99
@@ -600,10 +598,13 @@ def game_screen(screen, assets,level,score):
                 ball.bounce(False)
 
                 # Game ends if all the blocks are gone
-            if len(blocks) == 0 and level<=5:
+            if len(blocks) == 0:
+                if level<=5:
                     level_up(screen)
                     level+=1
                     level_done=True
+                else:
+                    state = DONE
                         
    
 
@@ -616,12 +617,6 @@ def game_screen(screen, assets,level,score):
                 state = DONE
                 
             
-                    
-            
-            
-            
-           
-
                # Verifica se houve colisão entre nave e meteoro
             hits = pygame.sprite.spritecollide(player, tiros, False, pygame.sprite.collide_circle)
             if hits:
@@ -676,7 +671,7 @@ def game_screen(screen, assets,level,score):
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
             
-    ret ={'state':state,'level':level,'score':score}        
+    ret ={'state':state,'level':level,'score':score,'FPS':FPS}        
     return ret 
 
 
@@ -705,12 +700,16 @@ try:
         if state == INTRODUCAO:
             state=introducao(screen)
         elif state == PLAYING:
-            ret = game_screen(screen, assets,level,score)
+            pygame.mixer.music.load(path.join(snd_dir, 'HawaiiFive-O-ThemeSongFullVersion.mp3'))
+            pygame.mixer.music.set_volume(0.4)
+            pygame.mixer.music.play(loops=-1)
+            ret = game_screen(screen, assets,level,score,FPS)
             score=ret['score']
             level=ret['level']
             state=ret['state']
-        elif state == GAME_OVER: #DONE
-            state= game_over_screen(screen)
+            FPS=ret['FPS']
+        elif state == DONE:
+                state= game_over_screen(screen)
         else:
             state = QUIT
 finally:
