@@ -9,8 +9,6 @@ import math
 from pygame.locals import *
 import time
 import pygameMenu
-#import ptext
-
 
 
 # Estabelece a pasta que contem as figuras e sons.
@@ -51,9 +49,9 @@ PAUSED = 8
 LEVEL_CONFIG = {
         1:{"fundo":'norway.png','rows':3,'FPS':60},
         2:{"fundo":'underwater2.png','rows':4,'FPS':400},
-#        3:{"fundo":'submarine.png','rows':5},
-#        4:{"fundo":'area_51_2.1.png','rows':6},
-#        5:{"fundo":'underwater2.png','rows':7}
+        3:{"fundo":'submarine.png','rows':5},
+        4:{"fundo":'area_51_2.1.png','rows':6},
+        5:{"fundo":'underwater2.png','rows':7}
         }
 
 GAME_SPEED=1
@@ -61,42 +59,21 @@ GAME_SPEED=1
 
 level=1
 
-
-def fade(WIDTH, HEIGHT): 
-    fade = pygame.Surface((WIDTH, HEIGHT))
-    fade.fill((0,0,0))
-    for alpha in range(0, 300):
-        fade.set_alpha(alpha)
-        #redrawWindow()
-        screen.blit(fade, (0,0))
-        pygame.display.update()
-        pygame.time.delay(3)
-
-
 def draw_text_middle(text, size, color, surface):
-    fonte= pygame.font.Font(path.join(fnt_dir, "Boogaloo.ttf"), 28)
-    label = fonte.render(text, 1, color)
+    label = score_font.render(text, 1, color)
 
-#    texto = ptext.draw(text,
-#    midbottom=(427,460), width=360, fontname="fonts/Boogaloo.ttf", fontsize=48, underline=True,
-#    color="#AAFF00", gcolor="#66AA00", owidth=1.5, ocolor="black", alpha=0.8, angle=5)
-#    
-    
-    texto = surface.blit(label, (WIDTH/2, HEIGHT/2))
+    texto = surface.blit(label, (WIDTH/2 - (label.get_width() / 2), HEIGHT/2 - label.get_height()/2))
     return texto
     
     
 def level_up(screen):
-#     tempo=pygame.time.get_ticks()
-#     cooldown = 30000
-#     now = pygame.time.get_ticks()
-#     
-#     if now - tempo>= cooldown:
-#                tempo=now
-#                return 
-            draw_text_middle("Level up!",60, WHITE, screen)
-            pygame.time.delay(8)
-
+     tempo=pygame.time.get_ticks()
+     cooldown = 30000
+     now = pygame.time.get_ticks()
+     
+     if now - tempo>= cooldown:
+                tempo=now
+                return draw_text_middle("Level up!",60, WHITE, screen)
     
 
 def introducao(screen):
@@ -200,7 +177,7 @@ def init_screen(screen):
 
     return state
                 
-def game_over_screen(screen,level):
+def game_over_screen(screen):
     
     clock = pygame.time.Clock()
 
@@ -230,8 +207,6 @@ def game_over_screen(screen,level):
                 if i > 5:
                         if event.key == pygame.K_n:
                             state = PLAYING
-                            level=1
-                            return state,level
                         else:
                             state=QUIT
                         running = False
@@ -616,9 +591,9 @@ def game_screen(screen, assets,level,score,FPS ) :
                 if event.type == pygame.KEYDOWN:
                     # Dependendo da tecla, altera a velocidade.
                     if event.key == pygame.K_LEFT:
-                        player.speedx = -10
+                        player.speedx = -8
                     if event.key == pygame.K_RIGHT:
-                        player.speedx = 10
+                        player.speedx = 8
                     if event.key == pygame.K_SPACE:
                         ball = Ball(player.rect.x)
 
@@ -744,11 +719,8 @@ try:
         if state == INIT:
             state = init_screen(screen)
         if state == INTRODUCAO:
-            fade(WIDTH,HEIGHT)
             state=introducao(screen)
         elif state == PLAYING:
-            fade(WIDTH,HEIGHT)
-            level_up(screen)
             pygame.mixer.music.load(path.join(snd_dir, 'HawaiiFive-O-ThemeSongFullVersion.mp3'))
             pygame.mixer.music.set_volume(0.4)
             pygame.mixer.music.play(loops=-1)
@@ -758,7 +730,7 @@ try:
             state=ret['state']
             FPS=ret['FPS']
         elif state == DONE:
-                state= game_over_screen(screen,level)
+                state= game_over_screen(screen)
         else:
             state = QUIT
 finally:

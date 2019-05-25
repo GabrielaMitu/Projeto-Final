@@ -78,6 +78,9 @@ class Player(pygame.sprite.Sprite):
         # Melhora a colisão estabelecendo um raio de um circulo
         self.radius = 70
     
+    
+        self.n_balls = 0
+
     def move(self):
         self.rect.x += self.speedx
         
@@ -113,7 +116,7 @@ class Submarine(pygame.sprite.Sprite):
         self.image.set_colorkey(BLACK)
 
     def shoot(self):
-        chance = random.randint(0,1000)
+        chance = random.randint(0,1500)
         if chance <= 1:
             shoot = Shoot("Red_laser.png" ,self.rect.center, 5)
             return shoot
@@ -246,7 +249,6 @@ class Explosion(pygame.sprite.Sprite):
 pygame.init()
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption("Jogo Beluga")
-#environ['SDL_VIDEO_CENTERED'] = '1'
 
 assets = load_assets(img_dir, snd_dir, fnt_dir)
 
@@ -268,8 +270,8 @@ black = [0,0,0]
 display_specs = pygame.display.Info()
 
 #game sets
-width_screen = display_specs.current_w
-height_screen = display_specs.current_h + 23
+#width_screen = display_specs.current_w
+#height_screen = display_specs.current_h + 23
 
 FPS = 100
 
@@ -283,7 +285,7 @@ subs_group = pygame.sprite.Group()
 
 for a in range(5):
     for y in range(10):
-        x = random.randint(50, width_screen-50)
+        x = random.randint(50, WIDTH-50)
         sub = Submarine("submarine.png", [x,y*30+40], 3)
         subs_group.add(sub)
 
@@ -325,7 +327,7 @@ while lifes > 0:
                 player.speedx = 0
 
     for sub in subs_group:
-        if sub.rect.right >= width_screen or sub.rect.left <= 0:
+        if sub.rect.right >= WIDTH or sub.rect.left <= 0:
             sub.flip()
         sub.move()
         shoot = sub.shoot()
@@ -350,6 +352,11 @@ while lifes > 0:
         explosion_duration = explosao.frame_ticks * len(explosao.explosion_anim) + 400
         while explosion:
             now = pygame.time.get_ticks()
+            if now - explosion_tick > explosion_duration:
+                if lifes > 0:
+                    player = Player(assets["player_img"])
+                    player_group.add(player)
+                    explosion=False
             
             
 
@@ -369,11 +376,11 @@ while lifes > 0:
 
     for ball in balls_group:
         ball.update()
-        if ball.rect.right >= width_screen or ball.rect.left <= 0:
+        if ball.rect.right >= WIDTH or ball.rect.left <= 0:
             ball.lateral_bounce()
         if ball.rect.top <= 0:
             ball.vertical_bounce()
-        if ball.rect.top > height_screen + 30:
+        if ball.rect.top > HEIGHT + 30:
             lifes -= 1
             player.n_balls -= 1
             ball.kill()
