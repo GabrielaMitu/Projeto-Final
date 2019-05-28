@@ -8,8 +8,7 @@ from os import path
 import math
 from pygame.locals import *
 import time
-import pygameMenu
-#import ptext
+import ptext
 
 
 
@@ -73,16 +72,17 @@ def fade(WIDTH, HEIGHT):
         pygame.time.delay(3)
 
 
-def draw_text_middle(text, size, color, surface):
-    fonte= pygame.font.Font(path.join(fnt_dir, "Boogaloo.ttf"), 28)
-    label = fonte.render(text, 1, color)
+def draw_text_middle(text):
+#    fonte= pygame.font.Font(path.join(fnt_dir, "Boogaloo.ttf"), 28)
+#    label = fonte.render(text, 1, color)
 
-#    texto = ptext.draw(text,
-#    midbottom=(427,460), width=360, fontname="fonts/Boogaloo.ttf", fontsize=48, underline=True,
-#    color="#AAFF00", gcolor="#66AA00", owidth=1.5, ocolor="black", alpha=0.8, angle=5)
-#    
+    texto = ptext.draw(text,
+    midbottom=(427,460), width=360, fontname="fonts\Boogaloo.ttf", fontsize=48, underline=True,
+    color="#AAFF00", gcolor="#66AA00", owidth=1.5, ocolor="black", alpha=0.8, angle=5)
+
     
-    texto = surface.blit(label, (WIDTH/2, HEIGHT/2))
+    
+    #texto = surface.blit(label, (WIDTH/2, HEIGHT/2))
     return texto
     
     
@@ -94,9 +94,9 @@ def level_up(screen):
 #     if now - tempo>= cooldown:
 #                tempo=now
 #                return 
-            draw_text_middle("Level up!",60, WHITE, screen)
+            texto = draw_text_middle("Level up!")
             pygame.time.delay(8)
-
+            return texto
     
 
 def introducao(screen):
@@ -231,6 +231,13 @@ def game_over_screen(screen,level):
                         if event.key == pygame.K_n:
                             state = PLAYING
                             level=1
+                            print(state,level)
+                             # A cada loop, redesenha o fundo e os sprites
+                            screen.fill(BLACK)
+                            screen.blit(background, background_rect)
+                    
+                            # Depois de desenhar tudo, inverte o display.
+                            pygame.display.flip()
                             return state,level
                         else:
                             state=QUIT
@@ -625,9 +632,9 @@ def game_screen(screen, assets,level,score,FPS ) :
                         all_sprites.add(ball)
                         balls.add(ball)
 
-                       # pew_sound.play()
-                    if event.key ==pygame.K_ESCAPE:
-                        state = PAUSED
+#                       # pew_sound.play()
+#                    if event.key ==pygame.K_ESCAPE:
+#                        state = PAUSED
 
                 # Verifica se soltou alguma tecla.
                 if event.type == pygame.KEYUP:
