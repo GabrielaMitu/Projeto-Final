@@ -48,13 +48,17 @@ DONE = 7
 PAUSED = 8
 
 LEVEL_CONFIG = {
-        1:{"fundo":'norway.png','rows':3,'descricao':"Sua aventura começa nos fiordes da Noruega"},
-        2:{"fundo":'underwater2.png','rows':4, 'descricao': "Entrando nas profundezas do oceano"}
+        1:{"fundo":'norway.png','rows':3,'descricao':"Sua aventura começa nos fiordes da Noruega","submarino":"submarine_pink"},
+        2:{"fundo":'underwater2.png','rows':4, 'descricao': "Entrando nas profundezas do oceano","submarino":"submarine_purple"}
 #        3:{"fundo":'atlantis.png','rows':5},
 #        4:{"fundo":'area_51_2.1.png','rows':6},
 #        5:{"fundo":'submarine.png','rows':7}
         }
-
+#assets["submarine_img"] = pygame.image.load(path.join(img_dir, "submarine.png")).convert()
+#    assets["submarine_pink"] = pygame.image.load(path.join(img_dir, "submarine-rosa.png")).convert()
+#    assets["submarine_purple"] = pygame.image.load(path.join(img_dir, "submarine-roxo.png")).convert()
+#    assets["submarine_green"] = pygame.image.load(path.join(img_dir, "submarine-verde.png")).convert()
+#    assets["submarine_silver"] = pygame.image.load(path.join(img_dir, "submarine-prata.png")).convert()
 #LEVEL_DES={
 #        1:"Sua aventura começa nos fiordes da Noruega",
 #        2: "Entrando nas profundezas do oceano",
@@ -298,6 +302,7 @@ class Player(pygame.sprite.Sprite):
     # Construtor da classe.
     def __init__(self, player_img):
         
+        
         # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
         
@@ -333,10 +338,13 @@ class Player(pygame.sprite.Sprite):
             self.rect.right = WIDTH
         if self.rect.left < 0:
             self.rect.left = 0
-                    
+                 
 
 class Block(pygame.sprite.Sprite):
-    def __init__(self, x, y, submarine_img, tiros):
+    def __init__(self, x, y, submarino_img, tiros):
+        
+        
+
 
         self.tiros=tiros
 
@@ -345,7 +353,7 @@ class Block(pygame.sprite.Sprite):
 
         # Create the image of the block of appropriate size
         # The width and height are sent as a list for the first parameter.
-        self.image = pygame.transform.scale(submarine_img, (45, 30))
+        self.image = pygame.transform.scale(submarino_img, (45, 30))
 
         self.image.set_colorkey(BLACK)
 
@@ -519,6 +527,12 @@ def load_assets(img_dir, snd_dir, fnt_dir):
     assets["player_img"] = pygame.image.load(path.join(img_dir, "player.png")).convert()
     assets["tiros_img"] = pygame.image.load(path.join(img_dir, 'Red_laser.png')).convert()
     assets["submarine_img"] = pygame.image.load(path.join(img_dir, "submarine.png")).convert()
+    assets["submarine.pink_img"] = pygame.image.load(path.join(img_dir, "submarine-rosa.png")).convert()
+    assets["submarine_purple"] = pygame.image.load(path.join(img_dir, "submarine-roxo.png")).convert()
+    assets["submarine_green"] = pygame.image.load(path.join(img_dir, "submarine-verde.png")).convert()
+    assets["submarine_silver"] = pygame.image.load(path.join(img_dir, "submarine-prata.png")).convert()
+    assets["airplane_img"] = pygame.image.load(path.join(img_dir, "airplane.png")).convert()
+
     assets["score_font"] = pygame.font.Font(path.join(fnt_dir, "PressStart2P.ttf"), 28)
     assets["boom_sound"] = pygame.mixer.Sound(path.join(snd_dir, 'expl3.wav'))
 
@@ -536,10 +550,11 @@ def load_assets(img_dir, snd_dir, fnt_dir):
 
 
 
-def game_screen(screen, assets,level,score,FPS ) :
+def game_screen(screen, assets,level,score,submarino_img ) :
     global GAME_SPEED
     
     config=LEVEL_CONFIG[level]
+    
     # Nome do jogo
     pygame.display.set_caption("BELUGA")
     
@@ -557,6 +572,9 @@ def game_screen(screen, assets,level,score,FPS ) :
     
     # Carrega a fonte para desenhar o score.
     score_font = assets["score_font"]
+    
+    submarino=config["submarino"]
+    submarino_img = assets[submarino]
     
     # Cria um grupo de todos os sprites e adiciona a nave.
     all_sprites = pygame.sprite.Group()
@@ -586,7 +604,7 @@ def game_screen(screen, assets,level,score,FPS ) :
         # 32 columns of blocks
         for column in range(0, 14):
             # Create a block (color,x,y)
-            block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
+            block=Block(column*(block_width+20)+1,top, submarino_img,tiros)
             blocks.add(block)
             all_sprites.add(block)
         # Move the top of the next row down
@@ -793,7 +811,6 @@ try:
             score=ret['score']
             level=ret['level']
             state=ret['state']
-            FPS=ret['FPS']
         elif state == DONE:
 #            ret = game_screen(screen, assets,level,score,FPS)
 #            level=ret['level']

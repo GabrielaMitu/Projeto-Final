@@ -152,7 +152,7 @@ class Player(pygame.sprite.Sprite):
         self.move()
 
             
-            
+ ############3           
 class Submarine(pygame.sprite.Sprite):
     # Construtor da classe.
     def __init__(self, img, startPosition, xspeed):
@@ -168,7 +168,7 @@ class Submarine(pygame.sprite.Sprite):
     def shoot(self):
         chance = random.randint(0,1500)
         if chance <= 1:
-            shoot = Shoot("Red_laser.png" ,self.rect.center, 5)
+            shoot = Shoot("airplane_missile.png" ,self.rect.center, 5)
             return shoot
         return None
 
@@ -230,12 +230,12 @@ class Ball(pygame.sprite.Sprite):
         self.move()
 
 
-
+#################
 class Shoot(pygame.sprite.Sprite):
     # Construtor da classe.
     def __init__(self, img, startPosition, yspeed):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(path.join(img_dir, 'Red_laser.png')).convert()
+        self.image = pygame.image.load(path.join(img_dir, 'airplane_missile.png')).convert()
         self.image = pygame.transform.scale(self.image, (10, 10))
         self.rect = self.image.get_rect()
         self.rect.center = startPosition
@@ -304,7 +304,7 @@ def nivel_extra(screen,state):
         
         
         clock = pygame.time.Clock()
-        
+     #########################################   
         background = pygame.image.load(path.join(img_dir, 'ilha.png')).convert()
         background_rect = background.get_rect()
         background = pygame.transform.scale(background, (WIDTH, HEIGHT))
@@ -373,7 +373,7 @@ def nivel_extra(screen,state):
             shoot_group.update()
             explosion_group.update()
             if state == JOGANDO:
-    
+    #####################
                 for sub in subs_group:
                     if sub.rect.right >= WIDTH or sub.rect.left <= 0:
                         sub.flip()
