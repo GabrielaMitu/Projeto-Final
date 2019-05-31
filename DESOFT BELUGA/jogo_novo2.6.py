@@ -48,21 +48,14 @@ DONE = 7
 MORREU = 8
 
 LEVEL_CONFIG = {
-        1:{"fundo":'norway.png','rows':3,'descricao':"Sua aventura começa nos fiordes da Noruega"},
-        2:{"fundo":'underwater2.png','rows':4, 'descricao': "Entrando nas profundezas do oceano"},
-        3:{"fundo":'atlantis2.png','rows':5, 'descricao': "Olha! Atlantis!"},
-        4:{"fundo":'area_51_2.1.png','rows':6, 'descricao':"Invadindo a Área 51!"},
-        5:{"fundo":'submarine.png','rows':7, 'descricao': "CENTRO DE COMANDO DO SUBMARINO MASTER"},
-        6:{"fundo":'ilha.png',"rows":5,"descricao":"FASE FINAL!!!"}
+        1:{"fundo":'norway.png','rows':3,'descricao':"Sua aventura começa nos fiordes da Noruega","submarino":"submarine_pink"},
+        2:{"fundo":'underwater2.png','rows':4, 'descricao': "Entrando nas profundezas do oceano","submarino":"submarine_purple"},
+        3:{"fundo":'atlantis2.png','rows':5, 'descricao': "Olha! Atlantis!","submarino":"submarine_silver"},
+        4:{"fundo":'area_51_2.1.png','rows':6, 'descricao':"Invadindo a Área 51!","submarino":"submarine_green"},
+        5:{"fundo":'submarine.png','rows':7, 'descricao': "CENTRO DE COMANDO DO SUBMARINO MASTER","submarino":"submarine_img"},
+        6:{"fundo":'ilha.png',"rows":5,"descricao":"FASE FINAL!!!","submarino":"submarine_img"}
          }
 
-#LEVEL_DES={
-#        1:"Sua aventura começa nos fiordes da Noruega",
-#        2: "Entrando nas profundezas do oceano",
-#        3:"Olha! Atlantis!",
-#        4:"Invadindo a Área 51!",
-#        5:"CENTRO DE COMANDO DO SUBMARINO MASTER"
-#        }
 
 GAME_SPEED=1
 
@@ -361,7 +354,7 @@ class Player(pygame.sprite.Sprite):
                     
 
 class Block(pygame.sprite.Sprite):
-    def __init__(self, x, y, submarine_img, tiros):
+    def __init__(self, x, y, submarino_img, tiros):
 
         self.tiros=tiros
 
@@ -370,7 +363,7 @@ class Block(pygame.sprite.Sprite):
 
         # Create the image of the block of appropriate size
         # The width and height are sent as a list for the first parameter.
-        self.image = pygame.transform.scale(submarine_img, (45, 30))
+        self.image = pygame.transform.scale(submarino_img, (45, 30))
 
         self.image.set_colorkey(BLACK)
 
@@ -386,13 +379,62 @@ class Block(pygame.sprite.Sprite):
     def update(self):
 
             # Have a random 1 in 200 change of shooting each frame
-        if random.randrange(20000) == 0:
-            tiro=Tiro(self.rect.centerx, self.rect.bottom, assets["tiros_img"])
+        if random.randrange(15000) == 0:
+            tiro=Tiro([self.rect.centerx, self.rect.bottom], assets["tiros_img"])
             self.tiros.add(tiro)
     
+
+
+class airplane(pygame.sprite.Sprite):
+    # Construtor da classe.
+    def __init__(self, img, startPosition, xspeed, tiros):
+        self.tiros=tiros
+
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(path.join(img_dir, 'airplane.png')).convert()
+        self.image = pygame.transform.scale(self.image, (45, 30))
+        self.rect = self.image.get_rect()
+        self.rect.centerx = startPosition[0]
+        self.rect.bottom = startPosition[1]
+        self.xspeed = xspeed
+        self.image.set_colorkey(BLACK)
+
+    def shoot(self):
+        if random.randrange(9500) == 0:
+            tiro=Tiro([self.rect.centerx, self.rect.bottom], assets["tiros_img"])
+            self.tiros.add(tiro)
+            
+#        chance = random.randint(0,20000)
+#        if chance <= 1:
+#            shoot = Tiro([self.rect.centerx,self.rect.bottom], assets["tiros_img"])
+#            return shoot
+#        return None
+
+    def move(self):
+        self.rect.x += self.xspeed
+
+    def flip(self):
+        self.xspeed = -self.xspeed
+        self.image = pygame.transform.flip(self.image, True, False)
+        
+    #################
+#class Shoot(pygame.sprite.Sprite):
+#    # Construtor da classe.
+#    def __init__(self, img, startPosition, yspeed):
+#        pygame.sprite.Sprite.__init__(self)
+#        self.image = pygame.image.load(path.join(img_dir, 'airplane_missile.png')).convert()
+#        self.image = pygame.transform.scale(self.image, (10, 10))
+#        self.rect = self.image.get_rect()
+#        self.rect.center = startPosition
+#        self.yspeed = yspeed
+#        self.image.set_colorkey(BLACK)
+
+
+#    def move(self):
+#        self.rect.y += self.yspeed    
         
 class Tiro(pygame.sprite.Sprite):
-    def __init__(self, x, y, tiro_img):
+    def __init__(self, startPosition, tiro_img):
 
         pygame.sprite.Sprite.__init__(self)
 
@@ -401,15 +443,15 @@ class Tiro(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(tiro_img, (10, 10))
         self.image.set_colorkey(BLACK)
         self.rect= self.image.get_rect()
-        self.rect.centerx = x
-        self.rect.y = y
+        self.rect.centerx = startPosition[0]
+        self.rect.y = startPosition[1]
         velocidade=random.randint(1,7)
         self.speed_y=velocidade
 
     def update(self):
         self.rect.y+=self.speed_y
+        
 
-    
         
 class Ball(pygame.sprite.Sprite):
     # Constructor. Pass in the color of the block, and its x and y position
@@ -535,47 +577,8 @@ class Explosion(pygame.sprite.Sprite):
                 self.rect = self.image.get_rect()
                 self.rect.center = center
                 
-class airplane(pygame.sprite.Sprite):
-    # Construtor da classe.
-    def __init__(self, img, startPosition, xspeed):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(path.join(img_dir, 'airplane.png')).convert()
-        self.image = pygame.transform.scale(self.image, (45, 30))
-        self.rect = self.image.get_rect()
-        self.rect.centerx = startPosition[0]
-        self.rect.bottom = startPosition[1]
-        self.xspeed = xspeed
-        self.image.set_colorkey(BLACK)
-
-    def shoot(self):
-        chance = random.randint(0,20000)
-        if chance <= 1:
-            shoot = Shoot("airplane_missile.png" ,self.rect.center, 0.5)
-            return shoot
-        return None
-
-    def move(self):
-        self.rect.x += self.xspeed
-
-    def flip(self):
-        self.xspeed = -self.xspeed
-        self.image = pygame.transform.flip(self.image, True, False)
-        
-
-class Shoot(pygame.sprite.Sprite):
-    # Construtor da classe.
-    def __init__(self, img, startPosition, yspeed):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(path.join(img_dir, 'airplane_missile.png')).convert()
-        self.image = pygame.transform.scale(self.image, (10, 10))
-        self.rect = self.image.get_rect()
-        self.rect.center = startPosition
-        self.speed_y=yspeed        
-        self.image.set_colorkey(BLACK)
 
 
-    def move(self):
-        self.rect.y += self.speed_y
  
  
 
@@ -588,6 +591,12 @@ def load_assets(img_dir, snd_dir, fnt_dir):
     assets["submarine_img"] = pygame.image.load(path.join(img_dir, "submarine.png")).convert()
     assets["score_font"] = pygame.font.Font(path.join(fnt_dir, "PressStart2P.ttf"), 28)
     assets["boom_sound"] = pygame.mixer.Sound(path.join(snd_dir, 'expl3.wav'))
+    assets["submarine_img"] = pygame.image.load(path.join(img_dir, "submarine.png")).convert()
+    assets["submarine_pink"] = pygame.image.load(path.join(img_dir, "submarine-rosa.png")).convert()
+    assets["submarine_purple"] = pygame.image.load(path.join(img_dir, "submarine-roxo.png")).convert()
+    assets["submarine_green"] = pygame.image.load(path.join(img_dir, "submarine-verde.png")).convert()
+    assets["submarine_silver"] = pygame.image.load(path.join(img_dir, "submarine-prata.png")).convert()
+    assets["airplane_img"] = pygame.image.load(path.join(img_dir, "airplane.png")).convert()
     explosion_anim = []
     for i in range(9):
         filename = 'regularExplosion0{}.png'.format(i)
@@ -602,7 +611,7 @@ def load_assets(img_dir, snd_dir, fnt_dir):
 
 
 
-def game_screen(screen, assets,level,score,FPS ) :
+def game_screen(screen, assets,level,score,submarino_img) :
     global GAME_SPEED
     
     config=LEVEL_CONFIG[level]
@@ -623,6 +632,11 @@ def game_screen(screen, assets,level,score,FPS ) :
     
     # Carrega a fonte para desenhar o score.
     score_font = assets["score_font"]
+    
+    submarino=config["submarino"]
+    submarino_img = assets[submarino]
+    
+    
     
     # Cria um grupo de todos os sprites e adiciona o player.
     all_sprites = pygame.sprite.Group()
@@ -653,7 +667,7 @@ def game_screen(screen, assets,level,score,FPS ) :
             # 32 columns of blocks
             for column in range(0, 14):
                 # Create a block (color,x,y)
-                block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
+                block=Block(column*(block_width+20)+1,top, submarino_img,tiros)
                 blocks.add(block)
                 all_sprites.add(block)
             # Move the top of the next row down
@@ -664,8 +678,8 @@ def game_screen(screen, assets,level,score,FPS ) :
             
             for y in range(10):
                 x = random.randint(50, WIDTH-50)
-                vel=random.randint(1,6)
-                block = airplane("airplane.png", [x,y*30+40], vel)
+                vel=random.randint(2,8)
+                block = airplane("airplane.png", [x,y*30+40], vel,tiros)
                 subs_group.add(block)
                 blocks.add(block)
                 all_sprites.add(block)
@@ -709,7 +723,7 @@ def game_screen(screen, assets,level,score,FPS ) :
 
                 
                         for shoot in shoot_group:
-                            shoot.move()
+                            shoot.update()
                 
 
             # Processa os eventos (mouse, teclado, botão, etc).
