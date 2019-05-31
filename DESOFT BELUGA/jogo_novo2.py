@@ -45,23 +45,23 @@ INTRODUCAO = 4
 #PLAYING = 5
 EXPLODING = 6
 DONE = 7
-PAUSED = 8
+MORREU = 8
 
 LEVEL_CONFIG = {
         1:{"fundo":'norway.png','rows':3,'descricao':"Sua aventura começa nos fiordes da Noruega"},
-        2:{"fundo":'underwater2.png','rows':4, 'descricao': "Entrando nas profundezas do oceano"}
-#        3:{"fundo":'atlantis.png','rows':5},
-#        4:{"fundo":'area_51_2.1.png','rows':6},
-#        5:{"fundo":'submarine.png','rows':7}
+        2:{"fundo":'underwater2.png','rows':4, 'descricao': "Entrando nas profundezas do oceano"},
+        3:{"fundo":'atlantis.png','rows':5, 'descricao': "Olha! Atlantis!"},
+        4:{"fundo":'area_51_2.1.png','rows':6, 'descricao':"Invadindo a Área 51!"},
+        5:{"fundo":'submarine.png','rows':7, 'descricao': "CENTRO DE COMANDO DO SUBMARINO MASTER"}
         }
 
-#LEVEL_DES={
-#        1:"Sua aventura começa nos fiordes da Noruega",
-#        2: "Entrando nas profundezas do oceano",
-#        3:"Olha! Atlantis!",
-#        4:"Invadindo a Área 51!",
-#        5:"CENTRO DE COMANDO DO SUBMARINO MASTER"
-#        }
+LEVEL_DES={
+        1:"Sua aventura começa nos fiordes da Noruega",
+        2: "Entrando nas profundezas do oceano",
+        3:"Olha! Atlantis!",
+        4:"Invadindo a Área 51!",
+        5:"CENTRO DE COMANDO DO SUBMARINO MASTER"
+        }
 
 GAME_SPEED=1
 
@@ -105,13 +105,16 @@ def fade(WIDTH, HEIGHT):
 def level_up(WIDTH, HEIGHT,level):
     config=LEVEL_CONFIG[level]
     descricao=config["descricao"]
-    
+    pygame.mixer.music.load(path.join(snd_dir, 'level-up.mp3'))
+    pygame.mixer.music.set_volume(0.4)
+    pygame.mixer.music.play(loops=-1)
     fade = pygame.Surface((WIDTH, HEIGHT))
     
 
     fade.fill((0,0,0))
-    for alpha in range(0, 300):
+    for alpha in range(0, 250):
         fade.set_alpha(alpha)
+        pygame.time.delay(5)
         if level>1:
             Escreve_nivel("LEVEL UP")
         Escreve_descricao(descricao)
@@ -119,11 +122,10 @@ def level_up(WIDTH, HEIGHT,level):
         #redrawWindow()
         screen.blit(fade, (0,0))
         pygame.display.update()
-        pygame.time.delay(5)
+        
         
         
 
-    
 
 def introducao(screen):
     # Variável para o ajuste de velocidade
@@ -234,7 +236,7 @@ def game_over_screen(screen,level):
     background_rect = background.get_rect()
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
     
-    pygame.mixer.music.load(path.join(snd_dir, 'MissionImpossibleTheme.ogg'))
+    pygame.mixer.music.load(path.join(snd_dir, 'MissionImpossibleTheme.mp3'))
     pygame.mixer.music.set_volume(0.4)
     pygame.mixer.music.play(loops=-1)
 
@@ -255,16 +257,14 @@ def game_over_screen(screen,level):
             if event.type == pygame.KEYDOWN:
                 if i > 5:
                         if event.key == pygame.K_n:
-                            state = PLAYING
-                            level=1
+                            state = INIT
                             print(state,level)
                              # A cada loop, redesenha o fundo e os sprites
                             screen.fill(BLACK)
                             screen.blit(background, background_rect)
-                    
                             # Depois de desenhar tudo, inverte o display.
                             pygame.display.flip()
-                            return state,level
+                            return state
                         else:
                             state=QUIT
                         running = False
@@ -283,7 +283,37 @@ def game_over_screen(screen,level):
             pygame.display.flip()
         
     return state
-   
+  
+
+def morreu(screen, level):
+    clock = pygame.time.Clock()
+    background = pygame.image.load(path.join(img_dir, 'GameOver-05.png')).convert()
+    background_rect = background.get_rect()
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+    running = True
+    while running:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                state = QUIT
+                running=False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_n:
+                    state = INIT
+                    screen.fill(BLACK)
+                    screen.blit(background, background_rect)
+                    # Depois de desenhar tudo, inverte o display.
+                    pygame.display.flip()
+                    return state
+            
+                        
+        # A cada loop, redesenha o fundo e os sprites
+        screen.fill(BLACK)
+        screen.blit(background, background_rect)
+
+        # Depois de desenhar tudo, inverte o display.
+        pygame.display.flip()
+    return state
     
                    
 # Classe Jogador que representa a beluga
@@ -515,7 +545,6 @@ def load_assets(img_dir, snd_dir, fnt_dir):
     assets["submarine_img"] = pygame.image.load(path.join(img_dir, "submarine.png")).convert()
     assets["score_font"] = pygame.font.Font(path.join(fnt_dir, "PressStart2P.ttf"), 28)
     assets["boom_sound"] = pygame.mixer.Sound(path.join(snd_dir, 'expl3.wav'))
-
     explosion_anim = []
     for i in range(9):
         filename = 'regularExplosion0{}.png'.format(i)
@@ -546,13 +575,13 @@ def game_screen(screen, assets,level,score,FPS ) :
     boom_sound = assets["boom_sound"]
     
     
-    # Cria uma nave. O construtor será chamado automaticamente.
+    # Cria o player. O construtor será chamado automaticamente.
     player = Player(assets["player_img"])
     
     # Carrega a fonte para desenhar o score.
     score_font = assets["score_font"]
     
-    # Cria um grupo de todos os sprites e adiciona a nave.
+    # Cria um grupo de todos os sprites e adiciona o player.
     all_sprites = pygame.sprite.Group()
     all_sprites.add(player)
     blocks = pygame.sprite.Group()
@@ -563,10 +592,6 @@ def game_screen(screen, assets,level,score,FPS ) :
     # Loop principal.
     lives = 99
 
-    #Estados do jogo
-   
-   
-    
     
     background = fundo_nivel(config['fundo'])
     FPS = 60
@@ -586,37 +611,6 @@ def game_screen(screen, assets,level,score,FPS ) :
         # Move the top of the next row down
         top += block_height + 2
         
-            
-            
-#            
-#    elif level == 2:
-#        background=fundo_nivel('underwater2.png')
-#     #   create_blocks(8,'submarine.png', tiros)
-#        top=80
-#        for row in range(6):
-#            # 32 columns of blocks
-#            for column in range(0, 14):
-#                # Create a block (color,x,y)
-#                block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
-#                blocks.add(block)
-#                all_sprites.add(block)
-#            # Move the top of the next row down
-#            top += block_height + 2
-#        
-        
-#    elif level == 3:
-#        fundo_nivel('atlantis2.png')
-#        FPS=100
-#        create_blocks(6,'submarine.png', tiros)
-#    elif level == 4:
-#        fundo_nivel('area_51_2.1.png')
-#        create_blocks(7,'submarine-azul.png')
-#        FPS=125
-#    elif level == 5:
-#        fundo_nivel('atlantis2.png')
-#        FPS=150
-#        create_blocks(8,'submarine-verde.png')
-
 
          
     level_done=False    
@@ -749,7 +743,8 @@ def game_screen(screen, assets,level,score,FPS ) :
         
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
-    ret ={'state':state,'level':level,'score':score,'FPS':FPS}        
+    ret ={'state':state,'level':level,'score':score,'FPS':FPS}
+    print(ret)        
     return ret 
 
 
@@ -770,30 +765,33 @@ assets = load_assets(img_dir, snd_dir, fnt_dir)
 score=0
 level=1
 # Comando para evitar travamentos.
-try:
-    state = INIT
-    while state != QUIT:
-        if state == INIT:
-            state = init_screen(screen)
-        if state == INTRODUCAO:
-            fade(WIDTH,HEIGHT)
-            state=introducao(screen)
-        elif state == PLAYING:
-            level_up(WIDTH,HEIGHT,level)
-            pygame.mixer.music.load(path.join(snd_dir, 'HawaiiFive-O-ThemeSongFullVersion.mp3'))
-            pygame.mixer.music.set_volume(0.4)
-            pygame.mixer.music.play(loops=-1)
-            ret = game_screen(screen, assets,level,score,FPS)
-            score=ret['score']
-            level=ret['level']
-            state=ret['state']
-            FPS=ret['FPS']
-        elif state == DONE:
-                state= game_over_screen(screen,level)
+#try:
+state = INIT
+while state != QUIT:
+    if state == INIT:
+        state = init_screen(screen)
+    if state == INTRODUCAO:
+        fade(WIDTH,HEIGHT)
+        state=introducao(screen)
+    elif state == PLAYING:
+        level_up(WIDTH,HEIGHT,level)
+        pygame.mixer.music.load(path.join(snd_dir, 'HawaiiFive-O-ThemeSongFullVersion.mp3'))
+        pygame.mixer.music.set_volume(0.4)
+        pygame.mixer.music.play(loops=-1)
+        ret = game_screen(screen, assets,level,score,FPS)
+        score=ret['score']
+        level=ret['level']
+        state=ret['state']
+        FPS=ret['FPS']
+    elif state == DONE:
+        if level==len(LEVEL_CONFIG):
+            state = game_over_screen(screen,level)
         else:
-            state = QUIT
-finally:
-    pygame.quit()
+            state = morreu(screen, level)
+    else:
+        state = QUIT
+#finally:
+pygame.quit()
 
   
 
