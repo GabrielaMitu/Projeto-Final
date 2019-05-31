@@ -207,6 +207,7 @@ def game_over_screen(screen):
                 if i > 5:
                         if event.key == pygame.K_n:
                             state = PLAYING
+                            level=1
                         else:
                             state=QUIT
                         running = False

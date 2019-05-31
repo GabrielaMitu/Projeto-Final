@@ -470,17 +470,16 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 assets = load_assets(img_dir, snd_dir, fnt_dir)
 
 # Comando para evitar travamentos.
-try:
-    state = INTRO
-    while state != QUIT:
-        if state == INTRO:
-            state = introducao_nivel_extra(screen)
-        elif state == JOGANDO:
-            state=nivel_extra(screen,state)
-        else:
-            state = QUIT
-finally:
-    pygame.quit()
+state = INTRO
+while state != QUIT:
+    if state == INTRO:
+        state = introducao_nivel_extra(screen)
+    elif state == JOGANDO:
+        state=nivel_extra(screen,state)
+    else:
+        state = QUIT
+
+pygame.quit()
 
   
 

@@ -226,8 +226,9 @@ def init_screen(screen):
 
     return state
                 
-def game_over_screen(screen,level):
+def game_over_screen(screen,ret):
     
+    level=ret['level']
     clock = pygame.time.Clock()
 
     background = pygame.image.load(path.join(img_dir, 'GameOver-01.png')).convert()
@@ -253,21 +254,26 @@ def game_over_screen(screen,level):
                 running = False
 
             if event.type == pygame.KEYDOWN:
-                if i > 5:
-                        if event.key == pygame.K_n:
-                            state = PLAYING
-                            level=1
+                if i == 5:
+                    background = pygame.image.load(path.join(img_dir, 'GameOver-0{}.png'.format(i))).convert()
+                    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+                    for event in pygame.event.get():
+                        if event.type == pygame.KEYDOWN:
+                            if event.key == pygame.K_n:
+                                    state = PLAYING
+                                    level=1
+                                     # A cada loop, redesenha o fundo e os sprites
+                                    screen.fill(BLACK)
+                                    screen.blit(background, background_rect)
+                            
+                                    # Depois de desenhar tudo, inverte o display.
+                                    pygame.display.flip()
+                                    return state,level
+                            else:
+                                    state=QUIT
+                                    running = False
                             print(state,level)
-                             # A cada loop, redesenha o fundo e os sprites
-                            screen.fill(BLACK)
-                            screen.blit(background, background_rect)
-                    
-                            # Depois de desenhar tudo, inverte o display.
-                            pygame.display.flip()
-                            return state,level
-                        else:
-                            state=QUIT
-                        running = False
+
                 else:
                     background = pygame.image.load(path.join(img_dir, 'GameOver-0{}.png'.format(i))).convert()
                     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
@@ -355,7 +361,7 @@ class Block(pygame.sprite.Sprite):
     def update(self):
 
             # Have a random 1 in 200 change of shooting each frame
-        if random.randrange(20000) == 0:
+        if random.randrange(15000) == 0:
             tiro=Tiro(self.rect.centerx, self.rect.bottom, assets["tiros_img"])
             self.tiros.add(tiro)
     
@@ -789,7 +795,9 @@ try:
             state=ret['state']
             FPS=ret['FPS']
         elif state == DONE:
-                state= game_over_screen(screen,level)
+#            ret = game_screen(screen, assets,level,score,FPS)
+#            level=ret['level']
+            state= game_over_screen(screen,ret)
         else:
             state = QUIT
 finally:
