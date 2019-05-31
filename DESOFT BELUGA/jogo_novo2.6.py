@@ -222,15 +222,16 @@ def init_screen(screen):
 
     return state
                 
-def game_over_screen(screen,level):
+def game_over_screen(screen,ret):
     
+    level=ret['level']
     clock = pygame.time.Clock()
 
     background = pygame.image.load(path.join(img_dir, 'GameOver-01.png')).convert()
     background_rect = background.get_rect()
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
     
-    pygame.mixer.music.load(path.join(snd_dir, 'MissionImpossibleTheme.mp3'))
+    pygame.mixer.music.load(path.join(snd_dir, 'MissionImpossibleTheme.ogg'))
     pygame.mixer.music.set_volume(0.4)
     pygame.mixer.music.play(loops=-1)
 
@@ -249,19 +250,15 @@ def game_over_screen(screen,level):
                 running = False
 
             if event.type == pygame.KEYDOWN:
-                if i > 5:
-                        if event.key == pygame.K_n:
-                            state = INIT
-                            print(state,level)
-                             # A cada loop, redesenha o fundo e os sprites
-                            screen.fill(BLACK)
-                            screen.blit(background, background_rect)
-                            # Depois de desenhar tudo, inverte o display.
-                            pygame.display.flip()
-                            return state
-                        else:
-                            state=QUIT
-                        running = False
+                if i == 5:
+                    background = pygame.image.load(path.join(img_dir, 'GameOver-0{}.png'.format(i))).convert()
+                    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+                    if event.key == pygame.K_n:
+                                    state = INIT
+                                    level=1
+                                    
+                                    running=False
+
                 else:
                     background = pygame.image.load(path.join(img_dir, 'GameOver-0{}.png'.format(i))).convert()
                     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
@@ -270,14 +267,13 @@ def game_over_screen(screen,level):
                        
                             
         # A cada loop, redesenha o fundo e os sprites
-            screen.fill(BLACK)
-            screen.blit(background, background_rect)
+        screen.fill(BLACK)
+        screen.blit(background, background_rect)
     
-            # Depois de desenhar tudo, inverte o display.
-            pygame.display.flip()
+        # Depois de desenhar tudo, inverte o display.
+        pygame.display.flip()
         
-    return state
-  
+    return state,level
 
 def morreu(screen, level):
     clock = pygame.time.Clock()
@@ -294,13 +290,7 @@ def morreu(screen, level):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_n:
                     state = INIT
-                    screen.fill(BLACK)
-                    screen.blit(background, background_rect)
-                    # Depois de desenhar tudo, inverte o display.
-                    pygame.display.flip()
-                    return state
-            
-                        
+                    level=1
         # A cada loop, redesenha o fundo e os sprites
         screen.fill(BLACK)
         screen.blit(background, background_rect)
@@ -792,7 +782,7 @@ def game_screen(screen, assets,level,score,submarino_img) :
             hits = pygame.sprite.spritecollide(player, tiros, False, pygame.sprite.collide_circle)
             if hits:
                 # Toca o som da colisão
-                # boom_sound.play()
+                boom_sound.play()
                 player.kill()
                 lives -= 1
                 for ball in balls:
@@ -892,9 +882,9 @@ while state != QUIT:
         FPS=ret['FPS']
     elif state == DONE:
         if level==len(LEVEL_CONFIG):
-            state = game_over_screen(screen,level)
+            state,level = game_over_screen(screen,ret)
         else:
-            state = morreu(screen, level)
+            state,level = morreu(screen, level)
     else:
         state = QUIT
 #finally:
