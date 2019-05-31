@@ -52,16 +52,17 @@ LEVEL_CONFIG = {
         2:{"fundo":'underwater2.png','rows':4, 'descricao': "Entrando nas profundezas do oceano"},
         3:{"fundo":'atlantis2.png','rows':5, 'descricao': "Olha! Atlantis!"},
         4:{"fundo":'area_51_2.1.png','rows':6, 'descricao':"Invadindo a Área 51!"},
-        5:{"fundo":'submarine.png','rows':7, 'descricao': "CENTRO DE COMANDO DO SUBMARINO MASTER"}
-        }
+        5:{"fundo":'submarine.png','rows':7, 'descricao': "CENTRO DE COMANDO DO SUBMARINO MASTER"},
+        6:{"fundo":'ilha.png',"rows":5,"descricao":"FASE FINAL!!!"}
+         }
 
-LEVEL_DES={
-        1:"Sua aventura começa nos fiordes da Noruega",
-        2: "Entrando nas profundezas do oceano",
-        3:"Olha! Atlantis!",
-        4:"Invadindo a Área 51!",
-        5:"CENTRO DE COMANDO DO SUBMARINO MASTER"
-        }
+#LEVEL_DES={
+#        1:"Sua aventura começa nos fiordes da Noruega",
+#        2: "Entrando nas profundezas do oceano",
+#        3:"Olha! Atlantis!",
+#        4:"Invadindo a Área 51!",
+#        5:"CENTRO DE COMANDO DO SUBMARINO MASTER"
+#        }
 
 GAME_SPEED=1
 
@@ -533,6 +534,48 @@ class Explosion(pygame.sprite.Sprite):
                 self.image = self.explosion_anim[self.frame]
                 self.rect = self.image.get_rect()
                 self.rect.center = center
+                
+class airplane(pygame.sprite.Sprite):
+    # Construtor da classe.
+    def __init__(self, img, startPosition, xspeed):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(path.join(img_dir, 'airplane.png')).convert()
+        self.image = pygame.transform.scale(self.image, (45, 30))
+        self.rect = self.image.get_rect()
+        self.rect.centerx = startPosition[0]
+        self.rect.bottom = startPosition[1]
+        self.xspeed = xspeed
+        self.image.set_colorkey(BLACK)
+
+    def shoot(self):
+        chance = random.randint(0,1500)
+        if chance <= 1:
+            shoot = Shoot("airplane_missile.png" ,self.rect.center, 5)
+            return shoot
+        return None
+
+    def move(self):
+        self.rect.x += self.xspeed
+
+    def flip(self):
+        self.xspeed = -self.xspeed
+        self.image = pygame.transform.flip(self.image, True, False)
+        
+
+class Shoot(pygame.sprite.Sprite):
+    # Construtor da classe.
+    def __init__(self, img, startPosition, yspeed):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(path.join(img_dir, 'airplane_missile.png')).convert()
+        self.image = pygame.transform.scale(self.image, (10, 10))
+        self.rect = self.image.get_rect()
+        self.rect.center = startPosition
+        self.yspeed = yspeed
+        self.image.set_colorkey(BLACK)
+
+
+    def move(self):
+        self.rect.y += self.yspeed
  
  
 
@@ -587,6 +630,10 @@ def game_screen(screen, assets,level,score,FPS ) :
     blocks = pygame.sprite.Group()
     tiros=pygame.sprite.Group()
     balls = pygame.sprite.Group()
+    shoot_group = pygame.sprite.Group()
+    subs_group = pygame.sprite.Group()
+
+
     
     
     # Loop principal.
@@ -601,15 +648,29 @@ def game_screen(screen, assets,level,score,FPS ) :
 
     font = pygame.font.Font(None, 36)
     
-    for row in range(config['rows']):
-        # 32 columns of blocks
-        for column in range(0, 14):
-            # Create a block (color,x,y)
-            block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
-            blocks.add(block)
-            all_sprites.add(block)
-        # Move the top of the next row down
-        top += block_height + 2
+    if level<=len(LEVEL_CONFIG)-1:
+        for row in range(config['rows']):
+            # 32 columns of blocks
+            for column in range(0, 14):
+                # Create a block (color,x,y)
+                block=Block(column*(block_width+20)+1,top, (assets["submarine_img"]),tiros)
+                blocks.add(block)
+                all_sprites.add(block)
+            # Move the top of the next row down
+            top += block_height + 2
+    else:
+        print(config)
+        for a in range(config['rows']):
+            
+            for y in range(10):
+                x = random.randint(50, WIDTH-50)
+                block = airplane("airplane.png", [x,y*30+40], 3)
+                subs_group.add(block)
+                blocks.add(block)
+                all_sprites.add(block)
+                
+
+        
         
 
          
@@ -631,6 +692,21 @@ def game_screen(screen, assets,level,score,FPS ) :
             for hit in hits: # Pode haver mais de um
                 score+=100
                 hit.bounce(False)
+                
+                
+            if level>len(LEVEL_CONFIG)-1:
+                print(blocks)
+                for sub in subs_group:
+                        if sub.rect.right >= WIDTH or sub.rect.left <= 0:
+                            sub.flip()
+                        sub.move()
+                        shoot = sub.shoot()
+                        if shoot != None:
+                            shoot_group.add(shoot)
+                
+                        for shoot in shoot_group:
+                            shoot.move()
+                
 
             # Processa os eventos (mouse, teclado, botão, etc).
             for event in pygame.event.get():
@@ -663,6 +739,8 @@ def game_screen(screen, assets,level,score,FPS ) :
                         player.speedx = 0
                     if event.key == pygame.K_RIGHT:
                         player.speedx = 0
+                        
+
 
             # See if the ball hits the player paddle
             for ball in pygame.sprite.spritecollide(player, balls, False):
@@ -671,7 +749,7 @@ def game_screen(screen, assets,level,score,FPS ) :
                 # Game ends if all the blocks are gone
             if len(blocks) == 0:
                 if level<len(LEVEL_CONFIG):
-                    level+=1
+                    level+=5
                     GAME_SPEED+=0.25
                     lives+=3
                 else:
@@ -689,6 +767,8 @@ def game_screen(screen, assets,level,score,FPS ) :
                 state = DONE
                 level_done=True
                 
+                
+            
             
                # Verifica se houve colisão entre nave e meteoro
             hits = pygame.sprite.spritecollide(player, tiros, False, pygame.sprite.collide_circle)
@@ -716,16 +796,23 @@ def game_screen(screen, assets,level,score,FPS ) :
                     all_sprites.add(player)
                     
      
+        
+        background_rect=background.get_rect()
+        screen.fill(BLACK)
+        screen.blit(background, background_rect)
         # Depois de processar os eventos.
         # Atualiza a acao de cada sprite.
         all_sprites.update()
         tiros.update()
+        player.update()
+        subs_group.draw(screen)
+        shoot_group.draw(screen)
+        #pygame.display.update()
         
+          
                     
         # A cada loop, redesenha o fundo e os sprites
-        background_rect=background.get_rect()
-        screen.fill(BLACK)
-        screen.blit(background, background_rect)
+        
         all_sprites.draw(screen)
         tiros.draw(screen)
 

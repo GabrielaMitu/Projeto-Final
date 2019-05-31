@@ -153,7 +153,7 @@ class Player(pygame.sprite.Sprite):
 
             
  ############3           
-class Submarine(pygame.sprite.Sprite):
+class airplane(pygame.sprite.Sprite):
     # Construtor da classe.
     def __init__(self, img, startPosition, xspeed):
         pygame.sprite.Sprite.__init__(self)
@@ -327,7 +327,7 @@ def nivel_extra(screen,state):
         for a in range(5):
             for y in range(10):
                 x = random.randint(50, WIDTH-50)
-                sub = Submarine("airplane.png", [x,y*30+40], 3)
+                sub = airplane("airplane.png", [x,y*30+40], 3)
                 subs_group.add(sub)
         
         balls_group = pygame.sprite.Group()

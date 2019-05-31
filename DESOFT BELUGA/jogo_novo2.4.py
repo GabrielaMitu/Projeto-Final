@@ -261,9 +261,7 @@ def game_over_screen(screen,ret):
                 if i == 5:
                     background = pygame.image.load(path.join(img_dir, 'GameOver-0{}.png'.format(i))).convert()
                     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-                    for event in pygame.event.get():
-                        if event.type == pygame.KEYDOWN:
-                            if event.key == pygame.K_n:
+                    if event.key == pygame.K_n:
                                     state = PLAYING
                                     level=1
                                      # A cada loop, redesenha o fundo e os sprites
@@ -272,11 +270,11 @@ def game_over_screen(screen,ret):
                             
                                     # Depois de desenhar tudo, inverte o display.
                                     pygame.display.flip()
-                                    return state,level
-                            else:
-                                    state=QUIT
-                                    running = False
-                            print(state,level)
+                                    running=False
+#                    else:   
+#                                    state=QUIT
+#                                    running = False
+#                                    print(state,level)
 
                 else:
                     background = pygame.image.load(path.join(img_dir, 'GameOver-0{}.png'.format(i))).convert()
@@ -286,13 +284,13 @@ def game_over_screen(screen,ret):
                        
                             
         # A cada loop, redesenha o fundo e os sprites
-            screen.fill(BLACK)
-            screen.blit(background, background_rect)
+        screen.fill(BLACK)
+        screen.blit(background, background_rect)
     
-            # Depois de desenhar tudo, inverte o display.
-            pygame.display.flip()
+        # Depois de desenhar tudo, inverte o display.
+        pygame.display.flip()
         
-    return state
+    return state,level
    
     
                    
@@ -527,7 +525,7 @@ def load_assets(img_dir, snd_dir, fnt_dir):
     assets["player_img"] = pygame.image.load(path.join(img_dir, "player.png")).convert()
     assets["tiros_img"] = pygame.image.load(path.join(img_dir, 'Red_laser.png')).convert()
     assets["submarine_img"] = pygame.image.load(path.join(img_dir, "submarine.png")).convert()
-    assets["submarine.pink_img"] = pygame.image.load(path.join(img_dir, "submarine-rosa.png")).convert()
+    assets["submarine_pink"] = pygame.image.load(path.join(img_dir, "submarine-rosa.png")).convert()
     assets["submarine_purple"] = pygame.image.load(path.join(img_dir, "submarine-roxo.png")).convert()
     assets["submarine_green"] = pygame.image.load(path.join(img_dir, "submarine-verde.png")).convert()
     assets["submarine_silver"] = pygame.image.load(path.join(img_dir, "submarine-prata.png")).convert()
@@ -814,7 +812,7 @@ try:
         elif state == DONE:
 #            ret = game_screen(screen, assets,level,score,FPS)
 #            level=ret['level']
-            state= game_over_screen(screen,ret)
+            state,level= game_over_screen(screen,ret)
         else:
             state = QUIT
 finally:
