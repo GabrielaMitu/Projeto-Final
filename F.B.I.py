@@ -45,7 +45,6 @@ INTRODUCAO = 4
 #PLAYING = 5
 EXPLODING = 6
 DONE = 7
-MORREU = 8
 
 LEVEL_CONFIG = {
         1:{"fundo":'norway.png','rows':3,'descricao':"Sua aventura começa nos fiordes da Noruega","submarino":"submarine_pink"},
@@ -57,7 +56,7 @@ LEVEL_CONFIG = {
          }
 
 
-GAME_SPEED=1
+GAME_SPEED=0.75
 
 
 level=1
@@ -291,7 +290,8 @@ def morreu(screen, level):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_n:
                     state = INIT
-                    level=1
+                    running=False
+                
         # A cada loop, redesenha o fundo e os sprites
         screen.fill(BLACK)
         screen.blit(background, background_rect)
@@ -666,7 +666,7 @@ def game_screen(screen, assets,level,score,submarino_img) :
     
     
     # Loop principal.
-    lives = 10
+    lives = 3
 
     
     background = fundo_nivel(config['fundo'])
@@ -908,7 +908,7 @@ while state != QUIT:
         if level==len(LEVEL_CONFIG):
             state,level = game_over_screen(screen,ret)
         else:
-            state,level = morreu(screen, level)
+            state = morreu(screen, level)
     else:
         state = QUIT
 #finally:
