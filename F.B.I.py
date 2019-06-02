@@ -337,7 +337,6 @@ class Player(pygame.sprite.Sprite):
         self.image = player_img
         
         # Diminuindo o tamanho da imagem.
-
         self.image = pygame.transform.scale(player_img, (70, 70))
         
         # Deixando transparente.
@@ -360,183 +359,190 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += self.speedx*GAME_SPEED
         
-        # Mantem dentro da tela
+        # Mantém dentro da tela
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
         if self.rect.left < 0:
             self.rect.left = 0
                     
             
-#Block que representa os submarinos
+#Classe Block que representa os submarinos
 class Block(pygame.sprite.Sprite):
     
     # Construtor da classe.
     def __init__(self, x, y, submarino_img, tiros):
         
+        #recebe tiros, projéteis lançados por eles que podem matar a beluga
         self.tiros=tiros
 
-        # chama o Sprite construtor
+        # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
 
-        # Create the image of the block of appropriate size
-        # The width and height are sent as a list for the first parameter.
+        # Tamanho
         self.image = pygame.transform.scale(submarino_img, (45, 30))
 
+        #Deixando transparente
         self.image.set_colorkey(BLACK)
 
-
-        # Fetch the rectangle object that has the dimensions of the image
+        # Representa as dimensões da imagem, melhora colisão
         self.rect = self.image.get_rect()
 
-        # Move the top left of the rectangle to x,y.
-        # This is where our block will appear..
+        # Posicionamento
         self.rect.x = x
         self.rect.y = y
 
+    # Metodo que atualiza as ações do submarino
     def update(self):
 
-            # Have a random 1 in 200 change of shooting each frame
+        # Chance de 1 em 15000 para atirar o 'tiro'
         if random.randrange(15000) == 0:
             tiro=Tiro([self.rect.centerx, self.rect.bottom], assets["tiros_img"])
             self.tiros.add(tiro)
     
 
-
+#Classe avião do último nível
 class airplane(pygame.sprite.Sprite):
+    
     # Construtor da classe.
     def __init__(self, img, startPosition, xspeed, tiros):
+        
+        #Também recebe 'tiros' para atacar a beluga
         self.tiros=tiros
-
+        
+        # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
+        
+        #Seleciona a imagem que representa o avião
         self.image = pygame.image.load(path.join(img_dir, 'airplane.png')).convert()
         self.image = pygame.transform.scale(self.image, (45, 30))
+        
+        # Representa as dimensões da imagem, melhora colisão
         self.rect = self.image.get_rect()
+        
+        #Posição
         self.rect.centerx = startPosition[0]
         self.rect.bottom = startPosition[1]
+        
+        #Velocidade
         self.xspeed = xspeed
+        
+        #Deixando transparente
         self.image.set_colorkey(BLACK)
 
+    #função para atirar
     def shoot(self):
+        
+        # Chance de 1 em 9500 para atirar o 'tiro'
         if random.randrange(9500) == 0:
             tiro=Tiro([self.rect.centerx, self.rect.bottom], assets["tiros_img"])
             self.tiros.add(tiro)
-            
-#        chance = random.randint(0,20000)
-#        if chance <= 1:
-#            shoot = Tiro([self.rect.centerx,self.rect.bottom], assets["tiros_img"])
-#            return shoot
-#        return None
-
+        
+    #movimentação do avião
     def move(self):
         self.rect.x += self.xspeed
 
+    #Virar ao alcançar o canto da tela
     def flip(self):
         self.xspeed = -self.xspeed
         self.image = pygame.transform.flip(self.image, True, False)
         
-    #################
-#class Shoot(pygame.sprite.Sprite):
-#    # Construtor da classe.
-#    def __init__(self, img, startPosition, yspeed):
-#        pygame.sprite.Sprite.__init__(self)
-#        self.image = pygame.image.load(path.join(img_dir, 'airplane_missile.png')).convert()
-#        self.image = pygame.transform.scale(self.image, (10, 10))
-#        self.rect = self.image.get_rect()
-#        self.rect.center = startPosition
-#        self.yspeed = yspeed
-#        self.image.set_colorkey(BLACK)
 
-
-#    def move(self):
-#        self.rect.y += self.yspeed    
-        
+#classe Tiro --> projétil do submarino e avião
 class Tiro(pygame.sprite.Sprite):
+    
+    # Construtor da classe.
     def __init__(self, startPosition, tiro_img):
-
+        
+        # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
 
-        # Diminuindo o tamanho da imagem.
-        #random.randrange(200) == 0:
+        # Tamanho
         self.image = pygame.transform.scale(tiro_img, (10, 10))
-        self.image.set_colorkey(BLACK)
         self.rect= self.image.get_rect()
+        
+        #Deixando transparente
+        self.image.set_colorkey(BLACK)
+        
+        #Posição 
         self.rect.centerx = startPosition[0]
         self.rect.y = startPosition[1]
+        
+        #Velocidade varia de 1 a 7
         velocidade=random.randint(1,7)
         self.speed_y=velocidade
 
+    # Metodo que atualiza a posição do tiro
     def update(self):
         self.rect.y+=self.speed_y
         
 
-        
+#Classe bola atirada pela beluga  
 class Ball(pygame.sprite.Sprite):
-    # Constructor. Pass in the color of the block, and its x and y position
+    
+    #Construtor da classe
     def __init__(self, x):
-        # Call the parent class (Sprite) constructor
+        
+        # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
 
-        # Speed in pixels per cycle
+        # Velocidade da bola (proporcional ao GAME_SPEED)
         self.speed = 10.0*GAME_SPEED
 
-        # Floating point representation of where the ball is
+        # Representação da localização inicial da bola
         self.x = x
         self.y = 500
-
-        # Direction of ball (in degrees)
-        # self.direction = 45
-
+        
+        #Dimensões da bola
         self.width=10
         self.height=10
 
-        # Create the image of the ball
+        # Cria a imagem da bola
         self.image = pygame.Surface([self.width, self.height])
 
-        # Color the ball
+        # Cor da bola
         self.image.fill(WHITE)
 
-        # Get a rectangle object that shows where our image is
+        # Posição
         self.rect = self.image.get_rect()
 
+        #Velocidade
         self.xspeed = math.sqrt(50)
         self.yspeed = math.sqrt(50)
 
-        # Get attributes for the height/width of the screen
+        # Atributos da tela
         self.screenheight = pygame.display.get_surface().get_height()
         self.screenwidth = pygame.display.get_surface().get_width()
 
-    # This function will bounce the ball off a horizontal surface (not a vertical one)
+    # 'Bounce' da bola
     def bounce(self,lado):
-        # self.direction = (180-self.direction)%360
-        # self.direction -= diff
         if lado:
             self.xspeed = -self.xspeed
         else:
             self.yspeed = -self.yspeed
 
-    # Update the position of the ball
+    # Atualização da posição da bola
     def update(self):
-        # Change the position (x and y) according to the speed and direction
+        #Muda a posição (x and y) de acordo com a velocidade e direção
         self.x += self.xspeed
         self.y -= self.yspeed
 
-        # Move the image to where our x and y are
+        # Move a imagem para onde estão x e y
         self.rect.x = self.x
         self.rect.y = self.y
 
-        # Do we bounce off the top of the screen?
+        # 'bounce' do topo da tela
         if self.y <= 0:
             self.bounce(False)
 
-        # Do we bounce off the left of the screen?
+        # 'bounce' da esquerda da tela
         if self.x <= 0:
             self.bounce(True)
 
-        # Do we bounce of the right side of the screen?
+        # 'bounce da direita da tela
         if self.x > self.screenwidth-self.width:
             self.bounce(True)
 
-        # Did we fall off the bottom edge of the screen?
+        #Quando sai da tela por baixo
         if self.y > 600:
             return True
         else:
@@ -544,7 +550,7 @@ class Ball(pygame.sprite.Sprite):
 
         
         
-        
+#Classe explosão, quando a beluga é atingida por míssil
 class Explosion(pygame.sprite.Sprite):
 
     # Construtor da classe.
@@ -595,10 +601,6 @@ class Explosion(pygame.sprite.Sprite):
                 self.rect.center = center
                 
 
-
- 
- 
-
 # Carrega todos os assets uma vez só.
 def load_assets(img_dir, snd_dir, fnt_dir):
     assets = {}
@@ -627,16 +629,15 @@ def load_assets(img_dir, snd_dir, fnt_dir):
 
 
 
-
+#Função durante o andamento do jogo
 def game_screen(screen, assets,level,score,submarino_img) :
     global GAME_SPEED
     
     config=LEVEL_CONFIG[level]
+    
     # Nome do jogo
     pygame.display.set_caption("BELUGA")
-    
 
-    
     # Variável para o ajuste de velocidade
     clock = pygame.time.Clock()
     
@@ -650,9 +651,9 @@ def game_screen(screen, assets,level,score,submarino_img) :
     # Carrega a fonte para desenhar o score.
     score_font = assets["score_font"]
     
+    #Carrega o submarino
     submarino=config["submarino"]
     submarino_img = assets[submarino]
-    
     
     
     # Cria um grupo de todos os sprites e adiciona o player.
@@ -663,31 +664,34 @@ def game_screen(screen, assets,level,score,submarino_img) :
     balls = pygame.sprite.Group()
     shoot_group = pygame.sprite.Group()
     subs_group = pygame.sprite.Group()
-
-
     
     
-    # Loop principal.
-    lives = 99
+    # número de vidas
+    lives = 10
 
-    
+    #Carrega o nível
     background = fundo_nivel(config['fundo'])
+    
+    #FPS do jogo
     FPS = 60
-    #create_blocks(4,'submarine-prata.png', tiros, blocks, all_sprites)
-     # The top of the block (y position)
+
+    #posição dos submarinos no topo
     top = 80
 
+    #fonte
     font = pygame.font.Font(None, 36)
     
+    #Configurações dos submarinos
     if level<=len(LEVEL_CONFIG)-1:
         for row in range(config['rows']):
-            # 32 columns of blocks
+            
+            # colunas dos submarinos
             for column in range(0, 14):
-                # Create a block (color,x,y)
+                
+                # informações dos blocks --> x,y, imagem, tiros
                 block=Block(column*(block_width+20)+1,top, submarino_img,tiros)
                 blocks.add(block)
                 all_sprites.add(block)
-            # Move the top of the next row down
             top += block_height + 2
     else:
         print(config)
@@ -711,24 +715,28 @@ def game_screen(screen, assets,level,score,submarino_img) :
     while state != QUIT and not level_done:
         
         # Ajusta a velocidade do jogo.
-#        clock.tick(FPS)
+        #clock.tick(FPS)
         
         if state == PLAYING:
             FPS=60
             clock.tick(FPS)
 
-
-
             font = pygame.font.Font(None, 36)
+            
+            #colisão entre bola e blocks
             hits = pygame.sprite.groupcollide(balls, blocks, False, True)
-            for hit in hits: # Pode haver mais de um
+            for hit in hits:
+                
+                #aumenta a pontuação do jogador quando acerta um block
                 score+=100
+                
+                #'bounce' no submarino quando o acerta
                 hit.bounce(False)
                 
                 
             if level>len(LEVEL_CONFIG)-1:
                 print(blocks)
-                for sub in blocks:#subs_group:
+                for sub in blocks:
                         if sub.rect.right >= WIDTH or sub.rect.left <= 0:
                             sub.flip()
                         sub.move()
@@ -763,10 +771,6 @@ def game_screen(screen, assets,level,score,submarino_img) :
                         all_sprites.add(ball)
                         balls.add(ball)
 
-#                       # pew_sound.play()
-#                    if event.key ==pygame.K_ESCAPE:
-#                        state = PAUSED
-
                 # Verifica se soltou alguma tecla.
                 if event.type == pygame.KEYUP:
                     # Dependendo da tecla, altera a velocidade.
@@ -777,11 +781,11 @@ def game_screen(screen, assets,level,score,submarino_img) :
                         
 
 
-            # See if the ball hits the player paddle
+            # Colisão bola e player
             for ball in pygame.sprite.spritecollide(player, balls, False):
                 ball.bounce(False)
 
-                # Game ends if all the blocks are gone
+            # Game ends if all the blocks are gone
             if len(blocks) == 0:
                 if level<len(LEVEL_CONFIG):
                     level+=1
@@ -805,13 +809,16 @@ def game_screen(screen, assets,level,score,submarino_img) :
                 
             
             
-               # Verifica se houve colisão entre nave e meteoro
+            # Verifica se houve colisão entre tiro e player
             hits = pygame.sprite.spritecollide(player, tiros, False, pygame.sprite.collide_circle)
+            
             if hits:
                 # Toca o som da colisão
                 boom_sound.play()
                 player.kill()
                 lives -= 1
+                
+                #Quando tiro atinge player, as bolas somem
                 for ball in balls:
                     ball.kill()
                 explosao = Explosion(player.rect.center, assets["explosion_anim"])
@@ -820,6 +827,7 @@ def game_screen(screen, assets,level,score,submarino_img) :
                 explosion_tick = pygame.time.get_ticks()
                 explosion_duration = explosao.frame_ticks * len(explosao.explosion_anim) + 400
 
+        #animação para a explosão, continuação do jogo se ele não morreu, caso contrário, state=morreu
         if state == EXPLODING:
             now = pygame.time.get_ticks()
             if now - explosion_tick > explosion_duration:
@@ -843,13 +851,9 @@ def game_screen(screen, assets,level,score,submarino_img) :
         subs_group.draw(screen)
         shoot_group.draw(screen)
         shoot_group.update()
-
-        #pygame.display.update()
         
           
-                    
-        # A cada loop, redesenha o fundo e os sprites
-        
+        # A cada loop, redesenha o fundo e os sprites  
         all_sprites.draw(screen)
         tiros.draw(screen)
 
