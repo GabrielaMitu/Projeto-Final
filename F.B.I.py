@@ -49,7 +49,7 @@ DONE = 7
 LEVEL_CONFIG = {
         1:{"fundo":'norway.png','rows':3,'descricao':"Sua aventura começa nos fiordes da Noruega","submarino":"submarine_pink"},
         2:{"fundo":'underwater2.png','rows':4, 'descricao': "Entrando nas profundezas do oceano","submarino":"submarine_purple"},
-        3:{"fundo":'atlantis2.png','rows':5, 'descricao': "Olha! Atlantis!","submarino":"submarine_silver"},
+        3:{"fundo":'atlantis.png','rows':5, 'descricao': "Olha! Atlantis!","submarino":"submarine_silver"},
         4:{"fundo":'area_51_2.1.png','rows':6, 'descricao':"Invadindo a Área 51!","submarino":"submarine_green"},
         5:{"fundo":'submarine.png','rows':7, 'descricao': "CENTRO DE COMANDO DO SUBMARINO MASTER","submarino":"submarine_img"},
         6:{"fundo":'ilha.png',"rows":5,"descricao":"FASE FINAL!!!","submarino":"submarine_img"}
@@ -153,7 +153,7 @@ def introducao(screen):
                     background = pygame.image.load(path.join(img_dir, 'intro-0{}.png'.format(i))).convert()
                     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
                     i+=1
-                    if i >= 6:
+                    if i > 6:
                         fade(WIDTH,HEIGHT)
                         state = PLAYING
                         running = False
