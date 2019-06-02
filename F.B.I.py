@@ -46,6 +46,7 @@ INTRODUCAO = 4
 EXPLODING = 6
 DONE = 7
 
+#Configuração de cada level do jogo
 LEVEL_CONFIG = {
         1:{"fundo":'norway.png','rows':3,'descricao':"Sua aventura começa nos fiordes da Noruega","submarino":"submarine_pink"},
         2:{"fundo":'underwater2.png','rows':4, 'descricao': "Entrando nas profundezas do oceano","submarino":"submarine_purple"},
@@ -56,25 +57,26 @@ LEVEL_CONFIG = {
          }
 
 
+#velocidade do jogo
 GAME_SPEED=0.75
 
-
+#Início no primeiro level
 level=1
 
 
 
 
+                            #---------------Funções----------------#
 
+#Escreve qual nível, localização na tela, fonte da letra
 def Escreve_nivel(text):
-#    fonte= pygame.font.Font(path.join(fnt_dir, "Boogaloo.ttf"), 28)
-#    label = fonte.render(text, 1, color)
-
     texto = ptext.draw(text,
     midbottom=(WIDTH/2,HEIGHT/4), width=360, fontname="fonts\Boogaloo.ttf", fontsize=100, underline=True,
     color="#AAFF00", gcolor="#66AA00", owidth=1.5, ocolor="black", alpha=0.8, angle=5)
-    #texto = surface.blit(label, (WIDTH/2, HEIGHT/2))
     return texto
 
+
+#Escreve a descrição para a transição de cada nível
 def Escreve_descricao(text):
     texto=ptext.draw(text,
     midbottom=(WIDTH/2,3*HEIGHT/4), width=360, fontname="fonts\Boogaloo.ttf", fontsize=40, underline=False,
@@ -83,7 +85,7 @@ def Escreve_descricao(text):
 
 
 
-    
+#Efeito (fade) para transição de cada nível  
 def fade(WIDTH, HEIGHT): 
     fade = pygame.Surface((WIDTH, HEIGHT))
     fade.fill((0,0,0))
@@ -94,7 +96,8 @@ def fade(WIDTH, HEIGHT):
         pygame.display.update()
         pygame.time. delay(3)
         
-        
+
+#Configurações de level up das funções anteriores e Som de level up  
 def level_up(WIDTH, HEIGHT,level):
     config=LEVEL_CONFIG[level]
     descricao=config["descricao"]
@@ -120,7 +123,7 @@ def level_up(WIDTH, HEIGHT,level):
         
         
 
-
+#Introdução do jogo
 def introducao(screen):
     # Variável para o ajuste de velocidade
     clock = pygame.time.Clock()
@@ -147,7 +150,7 @@ def introducao(screen):
                 state = QUIT
                 running = False
                 
-            
+            #Apertar espaço para prosseguir com a introdução
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     background = pygame.image.load(path.join(img_dir, 'intro-0{}.png'.format(i))).convert()
@@ -164,12 +167,10 @@ def introducao(screen):
 
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
-
-    return state
-                
+    return state            
 
 
-   
+#background dos níveis
 def fundo_nivel(imagem):
         background = pygame.image.load(path.join(img_dir, imagem)).convert()
         background.get_rect()
@@ -177,19 +178,7 @@ def fundo_nivel(imagem):
         return background
         
 
-
-## 
-#def create_blocks(numero_blocos,inimigo, tiros, blocks, all_sprites):
-#        top = 80 
-#        imagem_inimigo= pygame.image.load(path.join(img_dir, inimigo)).convert()
-#        blockcount=10
-#        for row in range(5):
-#                for column in range(0, blockcount):
-#                    block=Block(column*(block_width+20)+1,top, (imagem_inimigo,tiros)) 
-#                    blocks.add(block)
-#                    all_sprites.add(block)
-#                top += block_height + 2
-
+#frame inicial do jogo
 def init_screen(screen):
     # Variável para o ajuste de velocidade
     clock = pygame.time.Clock()
@@ -209,6 +198,7 @@ def init_screen(screen):
             if event.type == pygame.QUIT:
                 state = QUIT
                 running = False
+            #Se apertou alguma tecla, começa o jogo
             if event.type == pygame.KEYDOWN:
                 state = INTRODUCAO
                 running = False
@@ -221,22 +211,28 @@ def init_screen(screen):
         pygame.display.flip()
 
     return state
-                
+
+#Quando termina o jogo: missão completa
+#Conquistas finais e opção de jogar novamente
 def game_over_screen(screen,ret):
     
     level=ret['level']
     clock = pygame.time.Clock()
-
+    
+    #background
     background = pygame.image.load(path.join(img_dir, 'GameOver-01.png')).convert()
     background_rect = background.get_rect()
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
     
+    #música de fundo
     pygame.mixer.music.load(path.join(snd_dir, 'MissionImpossibleTheme.ogg'))
     pygame.mixer.music.set_volume(0.4)
     pygame.mixer.music.play(loops=-1)
 
 
     running = True
+    
+    # i = indicativo de qual 'GameOver-0{}' (imagem) é --> imagens finais do jogo
     i=2
 
     while running:      
@@ -248,15 +244,17 @@ def game_over_screen(screen,ret):
             if event.type == pygame.QUIT:
                 state = QUIT
                 running = False
-
+                
+            #Aperta uma tecla para prosseguir com o final    
             if event.type == pygame.KEYDOWN:
                 if i == 5:
                     background = pygame.image.load(path.join(img_dir, 'GameOver-0{}.png'.format(i))).convert()
                     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+                    
+                    #Apertar 'n' para jogar novamente
                     if event.key == pygame.K_n:
                                     state = INIT
                                     level=1
-                                    
                                     running=False
 
                 else:
@@ -275,6 +273,7 @@ def game_over_screen(screen,ret):
         
     return state,level
 
+#Quando morrer, opção de jogar novamente
 def morreu(screen, level):
     clock = pygame.time.Clock()
     background = pygame.image.load(path.join(img_dir, 'GameOver-05.png')).convert()
@@ -317,8 +316,8 @@ def timer():
         fps_clock = pygame.time.Clock()
     
         pygame.display.flip()
-            # clock.tick(30) limits the game to 30 frames per second.
-            # dt = time needed for last frame in ms. /1000 to convert to seconds.
+        # clock.tick(30) limits the game to 30 frames per second.
+        # dt = time needed for last frame in ms. /1000 to convert to seconds.
         dt = fps_clock.tick(30) / 1000
         if timer==0:
             state=DONE
@@ -351,7 +350,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
         
-        # Velocidade da nave
+        # Velocidade da beluga
         self.speedx = 0
         
         # Melhora a colisão estabelecendo um raio de um circulo
@@ -367,13 +366,16 @@ class Player(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
                     
-
+            
+#Block que representa os submarinos
 class Block(pygame.sprite.Sprite):
+    
+    # Construtor da classe.
     def __init__(self, x, y, submarino_img, tiros):
-
+        
         self.tiros=tiros
 
-        # Call the parent class (Sprite) constructor
+        # chama o Sprite construtor
         pygame.sprite.Sprite.__init__(self)
 
         # Create the image of the block of appropriate size
@@ -783,7 +785,7 @@ def game_screen(screen, assets,level,score,submarino_img) :
             if len(blocks) == 0:
                 if level<len(LEVEL_CONFIG):
                     level+=1
-                    GAME_SPEED+=0.25
+                    GAME_SPEED+=0.125
                     lives+=3
                 else:
                     state = DONE
@@ -881,38 +883,42 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Nome do jogo
 pygame.display.set_caption("FBI")
+
 # Carrega todos os assets uma vez só e guarda em um dicionário
 assets = load_assets(img_dir, snd_dir, fnt_dir)
 
+#pontos e nível iniciais
 score=0
 level=1
-# Comando para evitar travamentos.
-#try:
-state = INIT
-while state != QUIT:
-    if state == INIT:
-        state = init_screen(screen)
-    if state == INTRODUCAO:
-        fade(WIDTH,HEIGHT)
-        state=introducao(screen)
-    elif state == PLAYING:
-        level_up(WIDTH,HEIGHT,level)
-        pygame.mixer.music.load(path.join(snd_dir, 'HawaiiFive-O-ThemeSongFullVersion.mp3'))
-        pygame.mixer.music.set_volume(0.4)
-        pygame.mixer.music.play(loops=-1)
-        ret = game_screen(screen, assets,level,score,FPS)
-        score=ret['score']
-        level=ret['level']
-        state=ret['state']
-    elif state == DONE:
-        if level==len(LEVEL_CONFIG):
-            state,level = game_over_screen(screen,ret)
+
+
+# Organização dos Estados e música 
+try:
+    state = INIT
+    while state != QUIT:
+        if state == INIT:
+            state = init_screen(screen)
+        if state == INTRODUCAO:
+            fade(WIDTH,HEIGHT)
+            state=introducao(screen)
+        elif state == PLAYING:
+            level_up(WIDTH,HEIGHT,level)
+            pygame.mixer.music.load(path.join(snd_dir, 'HawaiiFive-O-ThemeSongFullVersion.mp3'))
+            pygame.mixer.music.set_volume(0.4)
+            pygame.mixer.music.play(loops=-1)
+            ret = game_screen(screen, assets,level,score,FPS)
+            score=ret['score']
+            level=ret['level']
+            state=ret['state']
+        elif state == DONE:
+            if level==len(LEVEL_CONFIG):
+                state,level = game_over_screen(screen,ret)
+            else:
+                state = morreu(screen, level)
         else:
-            state = morreu(screen, level)
-    else:
-        state = QUIT
-#finally:
-pygame.quit()
+            state = QUIT
+finally:
+    pygame.quit()
 
   
 
