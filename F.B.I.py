@@ -666,7 +666,7 @@ def game_screen(screen, assets,level,score,submarino_img) :
     
     
     # Loop principal.
-    lives = 3
+    lives = 99
 
     
     background = fundo_nivel(config['fundo'])
