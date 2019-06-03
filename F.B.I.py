@@ -274,7 +274,8 @@ def game_over_screen(screen,ret):
     return state,level
 
 #Quando morrer, opção de jogar novamente
-def morreu(screen, level):
+def morreu(screen, ret):
+    level=ret['level']
     clock = pygame.time.Clock()
     background = pygame.image.load(path.join(img_dir, 'GameOver-05.png')).convert()
     background_rect = background.get_rect()
@@ -289,6 +290,7 @@ def morreu(screen, level):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_n:
                     state = INIT
+                    level=1
                     running=False
                 
         # A cada loop, redesenha o fundo e os sprites
@@ -297,31 +299,9 @@ def morreu(screen, level):
 
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
-    return state
+    return state,level
 
 
-def timer():
-    dt = 0
-    timer = 100
-    t=True
-    while t==True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                state = QUIT
-        timer -= dt
-
-        score_font=assets["score_font"]
-        time_txt = score_font.render(str(round(timer, 2)), True, BLACK)
-        screen.blit(time_txt, (50, 20))
-        fps_clock = pygame.time.Clock()
-    
-        pygame.display.flip()
-        # clock.tick(30) limits the game to 30 frames per second.
-        # dt = time needed for last frame in ms. /1000 to convert to seconds.
-        dt = fps_clock.tick(30) / 1000
-        if timer==0:
-            state=DONE
-        return state
         
                    
 # Classe Jogador que representa a beluga
@@ -871,7 +851,7 @@ def game_screen(screen, assets,level,score,submarino_img) :
         
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
-    ret ={'state':state,'level':level,'score':score,'FPS':FPS}
+    ret ={'state':state,'level':level,'score':score}
     print(ret)        
     return ret 
 
@@ -918,7 +898,7 @@ try:
             if level==len(LEVEL_CONFIG):
                 state,level = game_over_screen(screen,ret)
             else:
-                state = morreu(screen, level)
+                state,level = morreu(screen, ret)
         else:
             state = QUIT
 finally:
