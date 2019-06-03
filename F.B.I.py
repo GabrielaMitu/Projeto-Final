@@ -672,7 +672,7 @@ def game_screen(screen, assets,level,score,submarino_img) :
     
     
     # número de vidas
-    lives = 10
+    lives = 5
 
     #Carrega o nível
     background = fundo_nivel(config['fundo'])
