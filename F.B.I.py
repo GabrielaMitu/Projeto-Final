@@ -83,6 +83,13 @@ def Escreve_descricao(text):
     color=WHITE, gcolor="#66AA00", owidth=1.5, ocolor="black", alpha=0.8, angle=0)
     return texto
 
+def Escreve_pontos(text):
+    texto=ptext.draw(text,
+    midbottom=(WIDTH/2,HEIGHT/2), width=360, fontname="fonts\Boogaloo.ttf", fontsize=80, underline=False,
+    color=BLUE, gcolor="#66AA00", owidth=1.5, ocolor="black", alpha=0.8, angle=0)
+    return texto
+
+
 
 
 #Efeito (fade) para transição de cada nível  
@@ -217,6 +224,7 @@ def init_screen(screen):
 def game_over_screen(screen,ret):
     
     level=ret['level']
+    score=ret['score']
     clock = pygame.time.Clock()
     
     #background
@@ -255,6 +263,7 @@ def game_over_screen(screen,ret):
                     if event.key == pygame.K_n:
                                     state = INIT
                                     level=1
+                                    score=0
                                     running=False
 
                 else:
@@ -271,18 +280,33 @@ def game_over_screen(screen,ret):
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
         
-    return state,level
+    return state,level, score
 
 #Quando morrer, opção de jogar novamente
 def morreu(screen, ret):
     level=ret['level']
+    score=ret["score"]
     clock = pygame.time.Clock()
-    background = pygame.image.load(path.join(img_dir, 'GameOver-05.png')).convert()
+    background = pygame.image.load(path.join(img_dir, 'morreu.png')).convert()
     background_rect = background.get_rect()
     background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+    
+    clock.tick(FPS)
+    fade = pygame.Surface((WIDTH, HEIGHT))
+
+
+    fade.fill((0,150,200))
+    for alpha in range(0, 250):
+        fade.set_alpha(alpha)
+        pygame.time.delay(5)
+        Escreve_pontos("Pontuação: {0}".format(score))
+        screen.blit(fade, (0,0))
+        pygame.display.update()
+        
+            
     running = True
     while running:
-        clock.tick(FPS)
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 state = QUIT
@@ -291,6 +315,7 @@ def morreu(screen, ret):
                 if event.key == pygame.K_n:
                     state = INIT
                     level=1
+                    score=0
                     running=False
                 
         # A cada loop, redesenha o fundo e os sprites
@@ -299,7 +324,7 @@ def morreu(screen, ret):
 
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
-    return state,level
+    return state,level,score
 
 
         
@@ -657,9 +682,6 @@ def game_screen(screen, assets,level,score,submarino_img) :
 
     #posição dos submarinos no topo
     top = 80
-
-    #fonte
-    font = pygame.font.Font(None, 36)
     
     #Configurações dos submarinos
     if level<=len(LEVEL_CONFIG)-1:
@@ -674,7 +696,6 @@ def game_screen(screen, assets,level,score,submarino_img) :
                 all_sprites.add(block)
             top += block_height + 2
     else:
-        print(config)
         for a in range(config['rows']):
             
             for y in range(10):
@@ -700,8 +721,6 @@ def game_screen(screen, assets,level,score,submarino_img) :
         if state == PLAYING:
             FPS=60
             clock.tick(FPS)
-
-            font = pygame.font.Font(None, 36)
             
             #colisão entre bola e blocks
             hits = pygame.sprite.groupcollide(balls, blocks, False, True)
@@ -715,7 +734,6 @@ def game_screen(screen, assets,level,score,submarino_img) :
                 
                 
             if level>len(LEVEL_CONFIG)-1:
-                print(blocks)
                 for sub in blocks:
                         if sub.rect.right >= WIDTH or sub.rect.left <= 0:
                             sub.flip()
@@ -770,7 +788,6 @@ def game_screen(screen, assets,level,score,submarino_img) :
                 if level<len(LEVEL_CONFIG):
                     level+=1
                     GAME_SPEED+=0.125
-                    lives+=3
                 else:
                     state = DONE
                 level_done=True
@@ -852,7 +869,6 @@ def game_screen(screen, assets,level,score,submarino_img) :
         # Depois de desenhar tudo, inverte o display.
         pygame.display.flip()
     ret ={'state':state,'level':level,'score':score}
-    print(ret)        
     return ret 
 
 
@@ -896,9 +912,9 @@ try:
             state=ret['state']
         elif state == DONE:
             if level==len(LEVEL_CONFIG):
-                state,level = game_over_screen(screen,ret)
+                state,level,score = game_over_screen(screen,ret)
             else:
-                state,level = morreu(screen, ret)
+                state,level,score = morreu(screen, ret)
         else:
             state = QUIT
 finally:
