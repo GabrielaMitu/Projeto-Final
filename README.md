@@ -1,5 +1,5 @@
 # Projeto-Final
-jogo arkanoid da beluga
+Jogo arkanoid da beluga
 
 Gabriela Yukari Mitu
 Gabriella Escobar Cukier
@@ -8,7 +8,7 @@ Gabriella Escobar Cukier
 ##INSTRUÇÕES TOP SECRET##
 Atenção! As seguintes instruções são confidenciais. Faça bom uso delas...
 Sua nova identidade é a de uma beluga espiã da União Soviética
-Sua missão é destruir os submarinos inimigos e salvar o mundo
+Sua missão é destruir os submarinos inimigos e salvar o mundo.
 Para isso:
 - Abra o arquivo F.B.I.py por meio do Prompt de Comando
 - Pressione qualquer tecla para começar
